@@ -1,0 +1,28 @@
+body {
+    background: 1E1E1E;
+    color: white;
+    font-family: "Montserrat", sans-serif;
+}
+
+#myBtn {
+    background: #5DADE2;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.card {
+    background: #242424;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
