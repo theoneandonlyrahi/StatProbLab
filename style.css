@@ -71,7 +71,7 @@ body {
     align-items: center;        /* centers cards and page-header */
 }
 
-/*  Page Header (Categorical, Quantitative, etc.)  */
+/*  Page  (Categorical, Quantitative, etc.)  */
 
 .page-header {
     text-align: center;
@@ -96,6 +96,29 @@ body {
     height: 1px;
     background: #2E2E2E;
     margin: 28px 0;
+}
+
+.page-text {
+    margin: 12px 125px 12px;
+    padding: 10px 10px 10px 10px;
+    color: #FFFFFF;
+    text-align: center;
+    line-height: 1.7;
+}
+
+.back-button {
+    background: transparent;
+    color: #AAAAAA;
+    border: none;
+    font-family: "Montserrat", sans-serif;
+    font-size: 30px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition:color 0.2s ease;
+}
+
+.back-button:hover {
+    color: #FFFFFF;
 }
 
 /*  Home Page  */
@@ -131,10 +154,10 @@ body {
 }
 
 .home-intro {
-    margin: 12px 12px 12px 12px;
+    margin: 12px 125px 12px;
     padding: 10px 10px 10px 10px;
     color: #FFFFFF;
-    text-align: left;
+    text-align: center;
 }
 
 .home-features {
@@ -187,7 +210,7 @@ body {
     gap: 20px;
     padding: 32px 0;
     justify-content: center;
-    width: 100%;
+    width: 75%;
 }
 
 .card {
@@ -232,4 +255,17 @@ body {
     color: #AAAAAA;
     line-height: 1.6;
     margin: 0;
+}
+
+/* Links  */
+
+a {
+    color: #46ba29;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+a:hover {
+    color: #8cff6a;
+    text-decoration: underline;
 }

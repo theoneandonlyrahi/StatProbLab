@@ -11,22 +11,22 @@
     <nav id="sidebar">
 
         <!-- Home Button-->
-        <button onclick="showPage('home')">Home</button>
+        <button onclick="showPage('page','home')">Home</button>
 
         <!-- Categorical Button-->
-        <button onclick="showPage('categorical')">Categorical</button>
+        <button onclick="showPage('page', 'categorical')">Categorical</button>
 
         <!-- Quantitative Button-->
-        <button onclick="showPage('quantitative')">Quantitative</button>
+        <button onclick="showPage('page', 'quantitative')">Quantitative</button>
 
         <!-- Distributions Button-->
-        <button onclick="showPage('distributions')">Distributions</button>
+        <button onclick="showPage('page', 'distributions')">Distributions</button>
 
         <!-- Simulations Button-->
-        <button onclick="showPage('simulations')">Simulations</button>
+        <button onclick="showPage('page', 'simulations')">Simulations</button>
 
         <!-- Settings Button-->
-        <button onclick="showPage('settings')">Settings</button>
+        <button onclick="showPage('page','settings')">Settings</button>
 
     </nav>
 
@@ -46,13 +46,11 @@
             <div class="page-divider"></div>
 
             <div class="home-content">
-                <p class="home-intro">StatProbLab is designed to make learning statistics and probability engaging and intuitive. Whether you're a student new to the subject or an educator looking for interactive teaching tools, StatProbLab offers a variety of features to enhance your understanding of key concepts. </p>
+                <p class="home-intro">StatProbLab is designed to make learning statistics and probability more engaging, interactive, and easier to understand. Whether you are a student learning the basics for the first time or an educator searching for helpful teaching tools, StatProbLab offers a variety of features that support learning through exploration and hands-on practice.</p>
 
-                <p class="home-intro">I built StatProbLab because I wanted to create a single, clean place to explore and understand statistical or probabilistic concepts. StatProbLab provides as an alternative interactive learning environment to Stapplet, an app widely used by other school districts.</p>
-            
-                <p class="home-intro">A huge thank you to my Probability and Statistics teacher, Ms. Lin, for making this subject exciting and engaging. Your way of teaching through simulations and scenarios is a big reason this project exists!</p>
+                <p class="home-intro">I created StatProbLab to provide a clean and organized space where users can explore statistical and probabilistic concepts in a simple and approachable way. The goal was to build an interactive learning environment that helps users better visualize and understand important ideas while offering an alternative to Stapplet, a program commonly used in many school districts.</p>
 
-                <p class="home-intro">In order to access the features below, you need to navigate through the sidebar on the left.</p>
+                <p class="home-intro">To access the different features and tools available in StatProbLab, use the sidebar located on the left side of the screen to navigate throughout the website.</p>
             
             </div>
 
@@ -74,16 +72,20 @@
         <div id="page-categorical" class="page">
 
             <div class="page-header">
-                <h2>Categorical Data Analysis</h2>
+                <h2><span style="color: #5897cb;">Categorical</span> Data Analysis</h2>
                 <p>Analyze and display categorical data through various visualizations such as bar charts, segmented bar charts, pie charts, and stacked bar charts.</p>
             </div>
 
             <div class="page-divider"></div>
 
+            <div class="page-text">
+                <p>Categorical Data Analysis is the process of inputting, examining, and analyzing information that is grouped into categories rather than measured numerically. These categories can include things such as favorite colors, types of pets, customer satisfaction levels, political preferences, or product choices. Instead of focusing on calculations like averages, categorical data analysis examines comparisons, proportions, frequencies, and relationships between groups. This type of analysis helps organize and interpret non-numerical information, making it easier to identify patterns and understand how different groups relate to one another.</p>
+            </div>
+
             <div class="cards-container">
 
                 <!-- Card 1: One Variable Categorical Data -->
-                <div class="card">
+                <div class="card", onclick="showPage('cat', 'one-single')">
                     <div class="card-accent" style="background: #79c3ff;"></div>
                     <div class="card-body">
                         <h3 class="card-title">One Variable Single Group</h3>
@@ -92,7 +94,7 @@
                 </div>
 
                 <!-- Card 2: One Variable Multiple Groups -->
-                <div class="card">
+                <div class="card", onclick="showPage('cat', 'one-multiple')">
                     <div class="card-accent" style="background: #58b1ff;"></div>
                     <div class="card-body">
                         <h3 class="card-title">One Variable Multiple Groups</h3>
@@ -101,7 +103,7 @@
                 </div>
 
                 <!-- Card 3: Two Variable Categorical Data -->
-                <div class="card">
+                <div class="card", onclick="showPage('cat', 'two-variable')">
                     <div class="card-accent" style="background: #219bff;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Two Variable Categorical Data</h3>
@@ -118,16 +120,20 @@
         <div id="page-quantitative" class="page">
 
             <div class="page-header">
-                <h2>Quantitative Data Analysis</h2>
+                <h2><span style="color: #dc5353;">Quantitative</span> Data Analysis</h2>
                 <p>Analyze and display quantitative data through various visualizations such as histograms, box plots, and scatter plots.</p>
             </div>
 
             <div class="page-divider"></div>
-    
+
+            <div class="page-text">
+                <p>Quantitative Data Analysis is the process of inputting, examining, and analyzing information that is measured using numbers rather than categories. This type of data can include values such as height, weight, temperature, income, ages, or test scores. Quantitative analysis focuses on identifying patterns, averages, differences, trends, and relationships within numerical data. By using mathematical and statistical methods, it helps researchers and analysts draw conclusions, make predictions, and better understand measurable information in a clear and organized way.</p>
+            </div>
+
             <div class="cards-container">
 
                 <!-- Card 1: One Variable Quantitative Data -->
-                <div class="card">
+                <div class="card" onclick="showPage('quan', 'one-single')">
                     <div class="card-accent" style="background: #ff7272;"></div>
                     <div class="card-body">
                         <h3 class="card-title">One Variable Single Group</h3>
@@ -136,7 +142,7 @@
                 </div>
 
                 <!-- Card 2: One Variable Multiple Groups -->
-                <div class="card">
+                <div class="card" onclick="showPage('quan', 'one-multiple')">
                     <div class="card-accent" style="background: #ff4848;"></div>
                     <div class="card-body">
                         <h3 class="card-title">One Variable Multiple Groups</h3>
@@ -145,7 +151,7 @@
                 </div>
 
                 <!-- Card 3: Two Variable Quantitative Data -->
-                <div class="card">
+                <div class="card" onclick="showPage('quan', 'two-variable')">
                     <div class="card-accent" style="background: #ff2020;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Two Variable Quantitative Data</h3>
@@ -162,16 +168,20 @@
         <!-- Distributions Page -->
         <div id="page-distributions" class="page">
             <div class="page-header">
-                <h2>Distributions</h2>
+                <h2><span style="color: #6656ae;">Distributions</span></h2>
                 <p>Analyze and display probability distributions to model real-world events through continuous and discrete models.</p>
             </div>
 
             <div class="page-divider"></div>
 
+            <div class="page-text">
+                <p>Distributions are mathematical models used to show how likely different outcomes are in a random event or experiment. They help explain how data is spread out and which results are more common or less common. By using distributions, we can better understand patterns, predict possible outcomes, and make sense of uncertainty in real-world situations. They are widely used in statistics, science, business, and data analysis to organize information and visualize how values or events are expected to occur over time or across different conditions.</p>
+            </div>
+
             <div class="cards-container">
 
                 <!-- Card 1: Normal Distribution -->
-                <div class="card">
+                <div class="card" onclick="showPage('dist', 'normal')">
                     <div class="card-accent" style="background: #c2b4ff;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Normal Distribution</h3>
@@ -180,7 +190,7 @@
                 </div>
 
                 <!-- Card 2: Uniform Distribution -->
-                <div class="card">
+                <div class="card" onclick="showPage('dist', 'uniform')">
                     <div class="card-accent" style="background: #b19fff;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Uniform Distribution</h3>
@@ -189,7 +199,7 @@
                 </div>
 
                 <!-- Card 3: Geometric Distribution -->
-                <div class="card">
+                <div class="card" onclick="showPage('dist', 'geometric')">
                     <div class="card-accent" style="background: #967fff;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Geometric Distribution</h3>
@@ -198,7 +208,7 @@
                 </div>
 
                 <!-- Card 4: Binomial Distribution -->
-                <div class="card">
+                <div class="card" onclick="showPage('dist', 'binomial')">
                     <div class="card-accent" style="background: #7b5dff;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Binomial Distribution</h3>
@@ -207,7 +217,7 @@
                 </div>
 
                 <!-- Card 5: Poisson Distribution -->
-                <div class="card">
+                <div class="card" onclick="showPage('dist', 'poisson')">
                     <div class="card-accent" style="background: #5934ff;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Poisson Distribution</h3>
@@ -222,16 +232,19 @@
         <!-- Simulations Page -->
         <div id="page-simulations" class="page">
             <div class="page-header">
-                <h2>Simulations</h2>
+                <h2 style="color: #57a643;">Simulations</h2>
                 <p>Explore various interesting simulation scenarios such as Monte Carlo methods, random walks, and dice rolls through interactive input.</p>
             </div>
 
             <div class="page-divider"></div>
 
+            <div class="page-text">
+                <p>Simulations allow users to explore probability and statistics by modeling real-world random events in an interactive way. These activities help demonstrate how chance, variation, and probability work through repeated trials and visual results. By running simulations, users can observe patterns, compare outcomes, and better understand important statistical concepts through hands-on experimentation. StatProbLab includes a variety of simulations, such as coin flips, dice rolls, random walks, card draws, and probability experiments, all designed to make learning more engaging and intuitive.</p>
+            </div>
             <div class="cards-container">
 
                 <!-- Card 1: Monte Carlo Pi Simulation -->
-                <div class="card">
+                <div class="card" onclick="showPage('sim', 'monte-carlo')">
                     <div class="card-accent" style="background: #acff97;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Monte Carlo Pi Simulation</h3>
@@ -240,7 +253,7 @@
                 </div>
 
                 <!-- Card 2: Dice Roll Simulation -->
-                <div class="card">
+                <div class="card" onclick="showPage('sim', 'dice-roll')">
                     <div class="card-accent" style="background: #aeff99;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Dice Roll Simulation</h3>
@@ -249,7 +262,7 @@
                 </div>
 
                 <!-- Card 3: Random Walk -->
-                <div class="card">
+                <div class="card" onclick="showPage('sim', 'random-walk')">
                     <div class="card-accent" style="background: #93ff78;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Random Walk</h3>
@@ -258,7 +271,7 @@
                 </div>
 
                 <!-- Card 4: Coin Flip -->
-                <div class="card">
+                <div class="card" onclick="showPage('sim', 'coin-flip')">
                     <div class="card-accent" style="background: #9cff84;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Coin Flip</h3>
@@ -267,7 +280,7 @@
                 </div>
 
                 <!-- Card 5: Spinner -->
-                <div class="card">
+                <div class="card" onclick="showPage('sim', 'spinner')">
                     <div class="card-accent" style="background: #88ff6a;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Spinner</h3>
@@ -276,7 +289,7 @@
                 </div>
 
                 <!-- Card 6: Card Draw -->
-                <div class="card">
+                <div class="card" onclick="showPage('sim', 'card-draw')">
                     <div class="card-accent" style="background: #5bff31;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Card Draw</h3>
@@ -285,11 +298,20 @@
                 </div>
 
                 <!-- Card 7: Same Birthday -->
-                <div class="card">
+                <div class="card" onclick="showPage('sim', 'same-birthday')">
                     <div class="card-accent" style="background: #5dff35;"></div>
                     <div class="card-body">
                         <h3 class="card-title">Same Birthday</h3>
                         <p class="card-text">Simulate the probability of two people in a group having the same birthday.</p>
+                    </div>
+                </div>
+
+                <!-- Card 8: Statistical Significance -->
+                <div class="card" onclick="showPage('sim', 'statistical-significance')">
+                    <div class="card-accent" style="background: #4cff20;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Statistical Significance</h3>
+                        <p class="card-text">Understand and apply concepts of statistical significance in hypothesis testing.</p>
                     </div>
                 </div>
 
@@ -308,7 +330,278 @@
 
 
         </div>
-    
+
+        <!---Sub Pages: These are the pages accessed through the cards-->
+        <!---Categorical Data Analysis-->
+        <!---One Variable Single Group -->
+        <div id="cat-one-single" class="page">
+            <button class="back-button" onclick="showPage('page', 'categorical')">Back</button>
+
+            <div class="page-header">
+                <h2><span style="color: #79c3ff;">One Variable Single Group</span> Categorical Data Analysis</h2>
+                <p>Analyze and compare one categorical variable from a singular group through bar charts, segmented bar charts, and pie charts.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---One Variable Multiple Groups -->
+        <div id="cat-one-multiple" class="page">
+            <button class="back-button" onclick="showPage('page', 'categorical')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #58b1ff;">One Variable Multiple Groups</span> Categorical Data Analysis</h2>
+                <p>Analyze and compare one categorical variable from multiple groups through bar charts, segmented bar charts, and pie charts.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Two Variable Groups -->
+        <div id="cat-two-variable" class="page">
+            <button class="back-button" onclick="showPage('page', 'categorical')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #219bff;">Two Variable Groups</span> Categorical Data Analysis</h2>
+                <p>Analyze and compare two categorical variables through side-by-side bar charts, segmented bar charts, and mosaic plots.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+
+        <!---Quantitative Data Analysis-->
+        <!---One Variable Single Group -->
+        <div id="quan-one-single" class="page">
+            <button class="back-button" onclick="showPage('page', 'quantitative')">Back</button>
+
+            <div class="page-header">
+                <h2><span style="color: #ff7272;">One Variable Single Group</span> Quantitative Data Analysis</h2>
+                <p>Analyze and compare one quantitative variable from a singular group through histograms, box plots, and summary statistics.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---One Variable Multiple Groups -->
+        <div id="quan-one-multiple" class="page">
+            <button class="back-button" onclick="showPage('page', 'quantitative')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #ff4848;">One Variable Multiple Groups</span> Quantitative Data Analysis</h2>
+                <p>Analyze and compare one quantitative variable from multiple groups through histograms, box plots, and summary statistics.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Two Variable Groups -->
+        <div id="quan-two-variable" class="page">
+            <button class="back-button" onclick="showPage('page', 'quantitative')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #ff2020;">Two Variable Groups</span> Quantitative Data Analysis</h2>
+                <p>Analyze and compare two quantitative variables through scatter plots, side-by-side box plots, and correlation analysis.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Distribution Analysis-->
+        <!---Normal Distribution -->
+        <div id="dist-normal" class="page">
+            <button class="back-button" onclick="showPage('page', 'distributions')">Back</button>
+
+            <div class="page-header">
+                <h2><span style="color: #c2b4ff;">Normal</span> Distribution</h2>
+                <p>Model and predict data that follows a normal distribution curve: symmetric, bell-shaped, and unimodal.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Uniform Distribution -->
+        <div id="dist-uniform" class="page">
+            <button class="back-button" onclick="showPage('page', 'distributions')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #b19fff;">Uniform</span> Distribution</h2>
+                <p>Model and predict data that follows a uniform distribution: all outcomes are equally likely.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Geometric Distribution -->
+        <div id="dist-geometric" class="page">
+            <button class="back-button" onclick="showPage('page', 'distributions')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #967fff;">Geometric</span> Distribution</h2>
+                <p>Model and predict data that follows a geometric distribution: the number of trials until the first success in a sequence of Bernoulli trials.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Binomial Distribution -->
+        <div id="dist-binomial" class="page">
+            <button class="back-button" onclick="showPage('page', 'distributions')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #7b5dff;">Binomial</span> Distribution</h2>
+                <p>Model and predict data that follows a binomial distribution: the number of successes in a fixed number of independent Bernoulli trials.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Poisson Distribution -->
+        <div id="dist-poisson" class="page">
+            <button class="back-button" onclick="showPage('page', 'distributions')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #5934ff;">Poisson</span> Distribution</h2>
+                <p>Model and predict data that follows a Poisson distribution: the number of events occurring in a fixed interval of time or space.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Simulation Analysis-->
+        <!---Monte Carlo Simulation -->
+        <div id="sim-monte-carlo" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+
+            <div class="page-header">
+                <h2><span style="color: #acff97;">Monte Carlo</span> Simulation</h2>
+                <p>Estimate the value of pi by generating random points in a square and determining the ratio of points that fall inside a circle.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Dice Roll Simulation -->
+        <div id="sim-dice-roll" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #aeff99;">Dice Roll</span> Simulation</h2>
+                <p>Simulate rolling a fair n-sided die and analyze the outcomes or probabilities of each face.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Random Walk Simulation -->
+        <div id="sim-random-walk" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #93ff78;">Random Walk</span> Simulation</h2>
+                <p>Simulate a random walk in one or more dimensions with equal probabilities for each step and analyze the resulting paths.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Coin Flip Simulation -->
+        <div id="sim-coin-flip" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #9cff84;">Coin Flip</span> Simulation</h2>
+                <p>Simulate flipping a fair coin and analyze the outcomes or probabilities of each side for a given number of trials.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Spinner -->
+        <div id="sim-spinner" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #88ff6a;">Spinner</span> Simulation</h2>
+                <p>Simulate spinning a fair spinner and analyze the outcomes or weighted probabilities of each section for a given number of trials.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Card Draw Simulation -->
+        <div id="sim-card-draw" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #5bff31;">Card Draw</span> Simulation</h2>
+                <p>Simulate drawing cards from a standard deck and analyze the outcomes or probabilities of each hand for a given number of trials and experiment with permutations.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Same Birthday Simulation -->
+        <div id="sim-same-birthday" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #5dff35;">Same Birthday</span> Simulation</h2>
+                <p>Observe an unusual probability: the likelihood that two people in a room share the same birthday. Inspired by <a href="https://www.youtube.com/watch?v=ofTb57aZHZs" target="_blank">Vsauce2's video</a> on the topic.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Statistical Significance Simulation -->
+        <div id="sim-statistical-significance" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #4cff20;">Statistical Significance</span> Simulation</h2>
+                <p>Simulate and weigh the results of hypothesis tests to understand the concept of statistical significance.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
     </main>
 
     <!-- Active Page Script -->
