@@ -1,28 +1,235 @@
 body {
-    background: 1E1E1E;
+    background: #1E1E1E;
     color: white;
     font-family: "Montserrat", sans-serif;
+    margin: 0;
+    display: flex;
+    height: 100vh;
 }
 
-#myBtn {
-    background: #5DADE2;
-    color: black;
+/*  Sidebar  */
+
+#sidebar {
+    width: 200px;
+    background: #181818;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+#sidebar button {
+    background: transparent;
+    color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 10px;
+    text-align: left;
     cursor: pointer;
+    border-radius: 8px;
+    font-family: "Montserrat", sans-serif;
+    font-size: 14px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+#sidebar button:hover {
+    transform: translateY(-2px);
+}
+
+#sidebar button:nth-child(1):hover { background: #616161; color: white; }
+#sidebar button:nth-child(2):hover { background: #5897cb; color: white; }
+#sidebar button:nth-child(3):hover { background: #dc5353; color: white; }
+#sidebar button:nth-child(4):hover { background: #6656ae; color: white; }
+#sidebar button:nth-child(5):hover { background: #57a643; color: white; }
+#sidebar button:nth-child(6):hover { background: #616161; color: white; }
+
+/*  Main  */
+
+#main {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    overflow-y: auto;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+/*  Pages  */
+
+.page {
+    display: none;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.page.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;        /* centers cards and page-header */
+}
+
+/*  Page Header (Categorical, Quantitative, etc.)  */
+
+.page-header {
+    text-align: center;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+.page-header h2 {
+    margin: 0 0 10px 0;
+}
+
+.page-header p {
+    color: #AAAAAA;
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.page-divider {
+    width: 100%;
+    height: 1px;
+    background: #2E2E2E;
+    margin: 28px 0;
+}
+
+/*  Home Page  */
+
+.home-header {
+    text-align: center;
+    width: 100%;
+    max-width: 580px;
+}
+
+.home-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: #FFFFFF;
+}
+
+.home-title .accent {
+    color: #e2dc72;
+}
+
+.home-title .version {
+    font-size: 14px;
+    font-weight: 400;
+    color: #AAAAAA;
+}
+
+.home-subtitle {
+    font-size: 14px;
+    color: #AAAAAA;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.home-intro {
+    margin: 12px 12px 12px 12px;
+    padding: 10px 10px 10px 10px;
+    color: #FFFFFF;
+    text-align: left;
+}
+
+.home-features {
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 20px;
+}
+
+.features-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 16px 0 16px 0;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.features-list li {
+    font-size: 14px;
+    color: #CCCCCC;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.features-list li::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dot);
+    flex-shrink: 0;
+}
+
+/*  Cards  */
+
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 32px 0;
+    justify-content: center;
+    width: 100%;
 }
 
 .card {
     background: #242424;
     border-radius: 12px;
+    border: 1px solid #333;
+    flex: 1;
+    min-width: 220px;
+    max-width: 380px;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s ease, background 0.2s ease;
+    text-align: left;
+}
+
+.card:hover {
+    background: #2E2E2E;
+    transform: translateY(-3px);
+}
+
+.card-accent {
+    height: 6px;
+    width: 100%;
+}
+
+.card-body {
     padding: 20px;
 }
 
-.page {
-    display: none;
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    color: #FFFFFF;
+    letter-spacing: 0.3px;
 }
 
-.page.active {
-    display: block;
+.card-text {
+    font-size: 13px;
+    font-weight: 400;
+    color: #AAAAAA;
+    line-height: 1.6;
+    margin: 0;
 }

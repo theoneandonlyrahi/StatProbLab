@@ -6,27 +6,313 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Hello from StatProbLab</h1>
-    <p>This is a simple paragraph.</p>
-    <button id="myBtn">Click me</button>
-    <script src="script.js"></script>
-    
+
+    <!-- Sidebar Content -->
     <nav id="sidebar">
+
+        <!-- Home Button-->
         <button onclick="showPage('home')">Home</button>
+
+        <!-- Categorical Button-->
         <button onclick="showPage('categorical')">Categorical</button>
+
+        <!-- Quantitative Button-->
+        <button onclick="showPage('quantitative')">Quantitative</button>
+
+        <!-- Distributions Button-->
+        <button onclick="showPage('distributions')">Distributions</button>
+
+        <!-- Simulations Button-->
+        <button onclick="showPage('simulations')">Simulations</button>
+
+        <!-- Settings Button-->
+        <button onclick="showPage('settings')">Settings</button>
+
     </nav>
 
+
+    <!-- Main Content -->
     <main id="main">
-        <div id="home-page" class="page active">
-            <h2>Welcome to StatProbLab</h2>
-            <p>This is the home page.</p>
+
+        <!---Main Pages: These are the pages on the sidebar-->
+        <!-- Home Page -->
+        <div id="page-home" class="page active">
+            <div class="home-header">
+                <h1 class = "home-title">Welcome to Stat<span class="accent">Prob</span>Lab <span class="version">v.1</span></h1>
+                <p class = "home-subtitle">An interactive platform for learning probability and statistics. Explore data analysis, probability distributions, regression, and simulation through a modern, accessible interface.</p>
+                <p class = "home-subtitle">Developed by: Rahidul Alam</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+            <div class="home-content">
+                <p class="home-intro">StatProbLab is designed to make learning statistics and probability engaging and intuitive. Whether you're a student new to the subject or an educator looking for interactive teaching tools, StatProbLab offers a variety of features to enhance your understanding of key concepts. </p>
+
+                <p class="home-intro">I built StatProbLab because I wanted to create a single, clean place to explore and understand statistical or probabilistic concepts. StatProbLab provides as an alternative interactive learning environment to Stapplet, an app widely used by other school districts.</p>
+            
+                <p class="home-intro">A huge thank you to my Probability and Statistics teacher, Ms. Lin, for making this subject exciting and engaging. Your way of teaching through simulations and scenarios is a big reason this project exists!</p>
+
+                <p class="home-intro">In order to access the features below, you need to navigate through the sidebar on the left.</p>
+            
+            </div>
+
+            <div class = "home-features">
+                <h3 class="features-label">Core Features</h3>
+                <ul class="features-list">
+                    <li style="--dot: #5897cb;">Categorical Data Analysis: bar charts, segmented bar charts, pie charts, and stacked bar charts</li>
+                    <li style="--dot: #dc5353;">Quantitative Data Analysis: histograms, box plots, and scatter plots</li>
+                    <li style="--dot: #6656ae;">Distributions: normal, binomial, and other common distributions</li>
+                    <li style="--dot: #57a643;">Simulations: Monte Carlo simulations and other probabilistic models</li>
+                </ul>
+            </div>
         </div>
 
-        <div id="categorical-page" class="page">
-            <h2>Categorical Data Analysis</h2>
-            <p>This page will cover categorical data analysis.</p>
+
+
+
+        <!-- Categorical Data Analysis Page-->
+        <div id="page-categorical" class="page">
+
+            <div class="page-header">
+                <h2>Categorical Data Analysis</h2>
+                <p>Analyze and display categorical data through various visualizations such as bar charts, segmented bar charts, pie charts, and stacked bar charts.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+            <div class="cards-container">
+
+                <!-- Card 1: One Variable Categorical Data -->
+                <div class="card">
+                    <div class="card-accent" style="background: #79c3ff;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">One Variable Single Group</h3>
+                        <p class="card-text">Analyze and display single-variable categorical data through bar charts, segmented bar charts, and pie charts.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2: One Variable Multiple Groups -->
+                <div class="card">
+                    <div class="card-accent" style="background: #58b1ff;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">One Variable Multiple Groups</h3>
+                        <p class="card-text">Analyze and display multiple-variable categorical data through grouped bar charts and stacked bar charts.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Two Variable Categorical Data -->
+                <div class="card">
+                    <div class="card-accent" style="background: #219bff;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Two Variable Categorical Data</h3>
+                        <p class="card-text">Analyze and display two-variable categorical data through side-by-side charts, segmented bar charts, and mosaic plots.</p>
+                    </div>
+                </div>
+
+            </div>
         </div>
+
+
+
+        <!-- Quantitative Data Analysis Page -->
+        <div id="page-quantitative" class="page">
+
+            <div class="page-header">
+                <h2>Quantitative Data Analysis</h2>
+                <p>Analyze and display quantitative data through various visualizations such as histograms, box plots, and scatter plots.</p>
+            </div>
+
+            <div class="page-divider"></div>
+    
+            <div class="cards-container">
+
+                <!-- Card 1: One Variable Quantitative Data -->
+                <div class="card">
+                    <div class="card-accent" style="background: #ff7272;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">One Variable Single Group</h3>
+                        <p class="card-text">Analyze and display single-variable quantitative data through histograms, box plots, and scatter plots.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2: One Variable Multiple Groups -->
+                <div class="card">
+                    <div class="card-accent" style="background: #ff4848;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">One Variable Multiple Groups</h3>
+                        <p class="card-text">Analyze and display multiple-variable quantitative data through histograms, box plots, and scatter plots.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Two Variable Quantitative Data -->
+                <div class="card">
+                    <div class="card-accent" style="background: #ff2020;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Two Variable Quantitative Data</h3>
+                        <p class="card-text">Analyze and display two-variable quantitative data through scatter plots.</p>
+                    </div>
+                </div>
+            
+            </div>
+
+        </div>
+
+
+
+        <!-- Distributions Page -->
+        <div id="page-distributions" class="page">
+            <div class="page-header">
+                <h2>Distributions</h2>
+                <p>Analyze and display probability distributions to model real-world events through continuous and discrete models.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+            <div class="cards-container">
+
+                <!-- Card 1: Normal Distribution -->
+                <div class="card">
+                    <div class="card-accent" style="background: #c2b4ff;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Normal Distribution</h3>
+                        <p class="card-text">Explore the properties of the normal distribution to model real-world data.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2: Uniform Distribution -->
+                <div class="card">
+                    <div class="card-accent" style="background: #b19fff;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Uniform Distribution</h3>
+                        <p class="card-text">Explore the properties of the uniform distribution to model equally likely outcomes.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Geometric Distribution -->
+                <div class="card">
+                    <div class="card-accent" style="background: #967fff;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Geometric Distribution</h3>
+                        <p class="card-text">Explore the properties of the geometric distribution to model the number of trials until the first success.</p>
+                    </div>
+                </div>
+
+                <!-- Card 4: Binomial Distribution -->
+                <div class="card">
+                    <div class="card-accent" style="background: #7b5dff;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Binomial Distribution</h3>
+                        <p class="card-text">Explore the properties of the binomial distribution to model the number of successes in a fixed number of trials.</p>
+                    </div>
+                </div>
+
+                <!-- Card 5: Poisson Distribution -->
+                <div class="card">
+                    <div class="card-accent" style="background: #5934ff;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Poisson Distribution</h3>
+                        <p class="card-text">Explore the properties of the poisson distribution to model the number of events in a fixed interval.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Simulations Page -->
+        <div id="page-simulations" class="page">
+            <div class="page-header">
+                <h2>Simulations</h2>
+                <p>Explore various interesting simulation scenarios such as Monte Carlo methods, random walks, and dice rolls through interactive input.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+            <div class="cards-container">
+
+                <!-- Card 1: Monte Carlo Pi Simulation -->
+                <div class="card">
+                    <div class="card-accent" style="background: #acff97;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Monte Carlo Pi Simulation</h3>
+                        <p class="card-text">Simulate the estimation of pi using the famous Monte Carlo method.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2: Dice Roll Simulation -->
+                <div class="card">
+                    <div class="card-accent" style="background: #aeff99;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Dice Roll Simulation</h3>
+                        <p class="card-text">Simulate rolling dice and analyze the distribution of outcomes.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Random Walk -->
+                <div class="card">
+                    <div class="card-accent" style="background: #93ff78;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Random Walk</h3>
+                        <p class="card-text">Simulate a random walk with equal probabilities and analyze the resulting paths.</p>
+                    </div>
+                </div>
+
+                <!-- Card 4: Coin Flip -->
+                <div class="card">
+                    <div class="card-accent" style="background: #9cff84;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Coin Flip</h3>
+                        <p class="card-text">Simulate flipping a coin and analyze the distribution of outcomes.</p>
+                    </div>
+                </div>
+
+                <!-- Card 5: Spinner -->
+                <div class="card">
+                    <div class="card-accent" style="background: #88ff6a;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Spinner</h3>
+                        <p class="card-text">Simulate a spinner with equal probability sections and analyze the distribution of outcomes.</p>
+                    </div>
+                </div>
+
+                <!-- Card 6: Card Draw -->
+                <div class="card">
+                    <div class="card-accent" style="background: #5bff31;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Card Draw</h3>
+                        <p class="card-text">Simulate drawing cards from a deck and analyze the distribution of outcome with or without replacement.</p>
+                    </div>
+                </div>
+
+                <!-- Card 7: Same Birthday -->
+                <div class="card">
+                    <div class="card-accent" style="background: #5dff35;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Same Birthday</h3>
+                        <p class="card-text">Simulate the probability of two people in a group having the same birthday.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Settings Page -->
+        <div id="page-settings" class="page">
+            <div class="page-header">
+                <h2>Settings</h2>
+                <p>This page will cover application settings.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+    
     </main>
+
+    <!-- Active Page Script -->
+    <script src="main.js"></script>
 
 </body>
 </html>
