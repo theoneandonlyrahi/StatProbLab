@@ -18,7 +18,11 @@ Live Site: https://theoneandonlyrahi.github.io/StatProbLab/
 - Two Variable: scatter plots and correlation analysis
 
 ### Distributions
-- Normal, Uniform, Geometric, Binomial, and Poisson distributions
+- Normal
+- Uniform
+- Geometric
+- Binomial,
+- Poisson
 
 ### Simulations
 - Monte Carlo Pi Estimation
