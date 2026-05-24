@@ -518,6 +518,36 @@ a:hover {
     text-align: center;
 }
 
+/* Customization  */
+.color-input {
+    width: 36px;
+    height: 28px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.custom-button {
+    background: #2E2E2E;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: #CCCCCC;
+    font-family: "Montserrat", sans-serif;
+    font-size: 12px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.custom-button:hover {
+    background: #444;
+    color: #FFFFFF;
+}
+
 /*  Generate Button  */
 
 #cat-one-single .generate-button { background: #5897cb; }

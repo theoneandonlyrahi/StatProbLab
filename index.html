@@ -366,6 +366,7 @@
                             <tr>
                                 <th>Category</th>
                                 <th>Frequency</th>
+                                <th>Color</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -373,6 +374,7 @@
                             <tr>
                                 <td><input type="text" class="table-input" placeholder="Category"></td>
                                 <td><input type="number" class="table-input" placeholder="Frequency"></td>
+                                <td><input type="color" class="color-input" placeholder="Color"></td>
                                 <td><button class="remove-row-button" onclick="removeRow(this)">X</button></td>
                             </tr>
                         </tbody>
@@ -421,7 +423,9 @@
                 </div>
 
                 <div class="custom-panel">
-                    <p class="output-placeholder">Customization will appear here after generating the chart.</p>
+                    <p class="input-label">Export</p>
+                    <button class="custom-button" onclick="downloadCatOS()">Download as PNG</button>
+                    <button class="custom-button" onclick="copyCatOS()">Copy to Clipboard</button>
                 </div>
 
             </div>

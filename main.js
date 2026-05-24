@@ -15,6 +15,7 @@ function addRow(tbodyId) {
     row.innerHTML = `
         <td><input type="text" class="table-input" placeholder="Category"></td>
         <td><input type="number" class="table-input" placeholder="Frequency"></td>
+        <td><input type="color" class="color-input" value="#5897cb"></td>
         <td><button class="remove-row-button" onclick="removeRow(this)">✕</button></td>
     `;
     tbody.appendChild(row);
@@ -46,14 +47,17 @@ function generateCatOS() {
     // Build data arrays from table rows 
     const labels = [];
     const values = [];
+    const colors = [];
 
     rows.forEach(row => {
         const inputs = row.querySelectorAll('input');
         const category = inputs[0].value.trim();
         const frequency = parseFloat(inputs[1].value);
+        const color = inputs[2].value;
         if (category && !isNaN(frequency)) {
             labels.push(category);
             values.push(frequency);
+            colors.push(color);
         }
     });
 
@@ -78,7 +82,7 @@ function generateCatOS() {
                 datasets: [{
                     label: 'Frequency',
                     data: values,
-                    backgroundColor: '#5897cb',
+                    backgroundColor: colors,
                     borderRadius: 6,
                 }]
             },
@@ -109,7 +113,7 @@ function generateCatOS() {
                 labels: labels,
                 datasets: [{
                     data: values,
-                    backgroundColor: ['#5897cb','#dc5353','#57a643','#6656ae','#e2dc72','#ff9800'],
+                    backgroundColor: colors,
                 }]
             },
             options: {
@@ -138,7 +142,7 @@ function generateCatOS() {
                 datasets: labels.map((label, i) => ({
                     label: label,
                     data: [((values[i] / total) * 100).toFixed(1)],
-                    backgroundColor: ['#5897cb','#dc5353','#57a643','#6656ae','#e2dc72','#ff9800'][i % 6],
+                    backgroundColor: colors[i],
                     borderRadius: 0,
                 }))
             },
@@ -191,4 +195,24 @@ function generateCatOS() {
     //  Show stats, hide placeholder 
     document.getElementById('cat-os-stats').style.display = 'block';
     document.querySelector('#cat-os-stats').previousElementSibling.style.display = 'none';
+}
+
+// Export CatOS chart
+function downloadCatOS() {
+    if (!catOSChart) return;
+    const link = document.createElement('a');
+    link.download = 'chart.png';
+    link.href = catOSChart.toBase64Image();
+    link.click();
+}
+
+// Copy CatOS chart to clipboard
+async function copyCatOS() {
+    if (!catOSChart) return;
+    const dataUrl = catOSChart.toBase64Image();
+    const blob = await (await fetch(dataUrl)).blob();
+    await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+    ]);
+    alert('Chart copied to clipboard!');
 }
