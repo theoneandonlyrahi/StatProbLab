@@ -5,8 +5,6 @@ An interactive statistics and probability learning tool built for students and e
 Live Site: https://theoneandonlyrahi.github.io/StatProbLab/
 (might be blocked by your IT; contact them to whitelist it)
 
----
-
 ## Features
 
 ### Categorical Data Analysis
@@ -35,7 +33,7 @@ Live Site: https://theoneandonlyrahi.github.io/StatProbLab/
 
 ---
 
-## Credits
+## Documentation & Hosting
 
 - HTML, CSS, JavaScript
 - [Chart.js](https://www.chartjs.org/) for data visualization
@@ -47,7 +45,7 @@ Live Site: https://theoneandonlyrahi.github.io/StatProbLab/
 
 Navigate using the sidebar on the left. Click any card to open the corresponding tool. Each tool has an input panel, visualization output, and stats summary.
 
-> Note: Currently desktop-only. Mobile support is not yet implemented.
+Note: Currently desktop-only. Mobile support is not yet implemented.
 
 ---
 
