@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>StatProbLab</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -315,6 +316,15 @@
                     </div>
                 </div>
 
+                <!-- Card 9: Parkinson's Smell -->
+                <div class="card" onclick="showPage('sim', 'parkinsons-smell')">
+                    <div class="card-accent" style="background: #3fff0f;"></div>
+                    <div class="card-body">
+                        <h3 class="card-title">Parkinson's Smell</h3>
+                        <p class="card-text">Simulate the probability of detecting Parkinson's disease through smell tests.</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -343,6 +353,78 @@
             </div>
 
             <div class="page-divider"></div>
+
+            <div class="tool-container">
+                <div class="input-panel">
+                    
+                    <label class="input-label">Variable Name</label>
+                    <input id="cat-os-varname" type="text" class="input-field" placeholder="e.g. Favorite Pet">
+
+                    <label class="input-label">Data</label>
+                    <table class="input-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Frequency</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cat-os-tbody">
+                            <tr>
+                                <td><input type="text" class="table-input" placeholder="Category"></td>
+                                <td><input type="number" class="table-input" placeholder="Frequency"></td>
+                                <td><button class="remove-row-button" onclick="removeRow(this)">X</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <button class="add-row-button" onclick="addRow('cat-os-tbody')">+</button>
+
+                    <label class="input-label">Chart Type</label>
+                    <select class="input-select" id="cat-os-charttype">
+                        <option value="bar">Bar Chart</option>
+                        <option value="segmented-bar">Segmented Bar Chart</option>
+                        <option value="pie">Pie Chart</option>
+                    </select>
+
+                    <button class="generate-button" onclick="generateCatOS()">Generate Chart</button>
+
+                </div>
+
+                <div class="output-panel">
+                    <p class="output-placeholder">Enter data and press generate to see the chart.</p>
+                    <canvas id="cat-os-chart" style="display:none;"></canvas>
+                </div>
+            </div>
+
+            <div class="bottom-container">
+                <div class="stats-panel">
+                    <p class="output-placeholder">Stats will appear here after generating the chart.</p>
+                    <div id="cat-os-stats" style="display:none;">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Frequency</th>
+                                    <th>Relative Frequency</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cat-os-stats-tbody"></tbody>
+                        </table>
+
+                        <div class="stat-summary">
+                            <p><span class="stat-label">n:</span> <span id="cat-os-n"></span></p>
+                            <p><span class="stat-label">Categories:</span> <span id="cat-os-categories"></span></p>
+                            <p><span class="stat-label">Mode:</span> <span id="cat-os-mode"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-panel">
+                    <p class="output-placeholder">Customization will appear here after generating the chart.</p>
+                </div>
+
+            </div>
 
 
         </div>
@@ -596,6 +678,20 @@
             <div class="page-header">
                 <h2><span style="color: #4cff20;">Statistical Significance</span> Simulation</h2>
                 <p>Simulate and weigh the results of hypothesis tests to understand the concept of statistical significance.</p>
+            </div>
+
+            <div class="page-divider"></div>
+
+
+        </div>
+
+        <!---Parkinsons Smell Simulation -->
+        <div id="sim-parkinsons-smell" class="page">
+            <button class="back-button" onclick="showPage('page', 'simulations')">Back</button>
+            
+            <div class="page-header">
+                <h2><span style="color: #3fff0f;">Parkinson's Smell</span> Simulation</h2>
+                <p>Simulate the probability of detecting Parkinson's disease through smell tests.</p>
             </div>
 
             <div class="page-divider"></div>
