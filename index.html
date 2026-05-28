@@ -242,6 +242,7 @@
             <div class="page-text">
                 <p>Simulations allow users to explore probability and statistics by modeling real-world random events in an interactive way. These activities help demonstrate how chance, variation, and probability work through repeated trials and visual results. By running simulations, users can observe patterns, compare outcomes, and better understand important statistical concepts through hands-on experimentation. StatProbLab includes a variety of simulations, such as coin flips, dice rolls, random walks, card draws, and probability experiments, all designed to make learning more engaging and intuitive.</p>
             </div>
+            
             <div class="cards-container">
 
                 <!-- Card 1: Monte Carlo Pi Simulation -->
@@ -426,6 +427,24 @@
                     <p class="input-label">Export</p>
                     <button class="custom-button" onclick="downloadCatOS()">Download as PNG</button>
                     <button class="custom-button" onclick="copyCatOS()">Copy to Clipboard</button>
+
+                    <div class="page-divider"></div>
+
+                    <p class="input-label">Chart Appearance</p>
+
+                    <label class="input-label">Chart Background</label>
+                    <input type="color" class="color-input" id="cat-os-bg" value="#ffffff" oninput="updateCatOSAppearance()">
+
+                    <label class="input-label">Axis Label Color</label>
+                    <input type="color" class="color-input" id="cat-os-axis-color" value="#aaaaaa" oninput="updateCatOSAppearance()">
+
+                    <label class="inputLabel">Title Color</label>
+                    <input type="color" class="color-input" id="cat-os-title-color" value="#ffffff" oninput="updateCatOSAppearance()">
+
+                    <label class="input-label">Gridline Color</label>
+                    <input type="color" class="color-input" id="cat-os-grid-color" value="#2e2e2e" oninput="updateCatOSAppearance()">
+
+
                 </div>
 
             </div>
@@ -443,7 +462,105 @@
             </div>
 
             <div class="page-divider"></div>
+            
+            <div class="tool-container">
+                <div class="input-panel">
+                    <label class="input-label">Variable Name</label>
+                    <input id="cat-om-varname" type="text" class="input-field" placeholder="e.g. Favorite Pet">
 
+                    <label class="input-label">Data</label>
+                    <div style="overflow-x: auto;">
+                        <table class="input-table" id="cat-om-table">
+                            <thead>
+                                <tr id="cat-om-header">
+                                    <th>Category</th>
+                                    <th><input type="text" class="table-header-input" placeholder="Group 1" value="Group 1"></th>
+                                    <th></th>
+                                </tr>
+                                <tr id="cat-om-colors">
+                                    <td></td>
+                                    <td><input type="color" class="color-input" value="#5897cb"></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="cat-om-tbody">
+                                <tr>
+                                    <td><input type="text" class="table-input" placeholder="Category"></td>
+                                    <td><input type="number" class="table-input" placeholder="Frequency"></td>
+                                    <td><button class="remove-row-button" onclick="removeRow(this)">X</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button class="add-row-button" onclick="addRowOM()">+ Row</button>
+                    <button class="add-row-button" onclick="addGroupOM()">+ Group</button>
+                    <button class="add-row-button" onclick="removeGroupOM()">- Group</button>
+
+                    <label class="input-label">Chart Type</label>
+                    <select class="input-select" id="cat-om-charttype">
+                        <option value="grouped-bar">Grouped Bar Chart</option>
+                        <option value="stacked-bar">Stacked Bar Chart</option>
+                    </select>
+
+                    <button class="generate-button" onclick="generateCatOM()">Generate Chart</button>
+                </div>
+
+                <div class="output-panel">
+                    <p class="output-placeholder">Enter data and press generate to see the chart.</p>
+                    <canvas id="cat-om-chart" style="display:none;"></canvas>
+                </div>
+            </div>
+
+            <div class="bottom-container">
+                <div class="stats-panel">
+                    <p class="output-placeholder">Stats will appear here after generating the chart.</p>
+                    <div id="cat-om-stats" style="display:none;">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Frequency</th>
+                                    <th>Relative Frequency</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cat-om-stats-tbody"></tbody>
+                        </table>
+
+                        <div class="stat-summary">
+                            <p><span class="stat-label">n:</span> <span id="cat-om-n"></span></p>
+                            <p><span class="stat-label">Categories:</span> <span id="cat-om-categories"></span></p>
+                            <p><span class="stat-label">Mode:</span> <span id="cat-om-mode"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-panel">
+                    <p class="input-label">Export</p>
+                    <button class="custom-button" onclick="downloadCatOM()">Download as PNG</button>
+                    <button class="custom-button" onclick="copyCatOM()">Copy to Clipboard</button>
+
+                    <div class="page-divider"></div>
+
+                    <p class="input-label">Chart Appearance</p>
+
+                    <label class="input-label">Chart Background</label>
+                    <input type="color" class="color-input" id="cat-om-bg" value="#ffffff" oninput="updateCatOMAppearance()">
+
+                    <label class="input-label">Axis Label Color</label>
+                    <input type="color" class="color-input" id="cat-om-axis-color" value="#aaaaaa" oninput="updateCatOMAppearance()">
+
+                    <label class="inputLabel">Title Color</label>
+                    <input type="color" class="color-input" id="cat-om-title-color" value="#ffffff" oninput="updateCatOMAppearance()">
+
+                    <label class="input-label">Gridline Color</label>
+                    <input type="color" class="color-input" id="cat-om-grid-color" value="#2e2e2e" oninput="updateCatOMAppearance()">
+
+
+                </div>
+
+            </div>
 
         </div>
 

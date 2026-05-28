@@ -548,6 +548,26 @@ a:hover {
     color: #FFFFFF;
 }
 
+.table-header-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #444;
+    color: #AAAAAA;
+    font-family: "Montserrat", sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 70px;
+    padding: 2px 4px;
+    text-align: left;
+}
+
+.table-header-input:focus {
+    outline: none;
+    border-bottom-color: #5897cb;
+    color: white;
+}
+
 /*  Generate Button  */
 
 #cat-one-single .generate-button { background: #5897cb; }
