@@ -16,7 +16,7 @@ function addRow(tbodyId) {
         <td><input type="text" class="table-input" placeholder="Category"></td>
         <td><input type="number" class="table-input" placeholder="Frequency"></td>
         <td><input type="color" class="color-input" value="#5897cb"></td>
-        <td><button class="remove-row-button" onclick="removeRow(this)">✕</button></td>
+        <td><button class="remove-row-button" onclick="removeRow(this)">X</button></td>
     `;
     tbody.appendChild(row);
 }
@@ -384,7 +384,7 @@ function addRowOM() {
     row.innerHTML = `
         <td><input type="text" class="table-input" placeholder="Category"></td>
         ${groupInputs}
-        <td><button class="remove-row-button" onclick="removeRow(this)">✕</button></td>
+        <td><button class="remove-row-button" onclick="removeRow(this)">X</button></td>
     `;
     tbody.appendChild(row);
 }
@@ -494,4 +494,257 @@ function updateCatOMAppearance() {
     }
 
     catOMChart.update();
+}
+
+// Two Variables Categorical
+let catTVChart = null;
+
+function addRowTV() {
+    const header = document.getElementById('cat-tv-header');
+    const tbody = document.getElementById('cat-tv-tbody');
+    const colCount = header.querySelectorAll('th').length - 3;
+
+    let cells = `<td><input type="text" class="table-input" placeholder="Row"></td>`;
+    for (let i = 0; i < colCount; i++) {
+        cells += `<td><input type="number" class="table-input" placeholder="0"></td>`;
+    }
+    cells += `<td><input type="color" class="color-input" value="#5897cb"></td>`;
+    cells += `<td><button class="remove-row-button" onclick="removeRow(this)">X</button></td>`;
+
+    const row = document.createElement('tr');
+    row.innerHTML = cells;
+    tbody.appendChild(row);
+}
+
+function addColTV() {
+    const header = document.getElementById('cat-tv-header');
+    const tbody = document.getElementById('cat-tv-tbody');
+    const colCount = header.querySelectorAll('th').length - 2;
+
+    const colorTh = header.querySelector('th:nth-last-child(2)');
+    const newTh = document.createElement('th');
+    newTh.innerHTML = `<input type="text" class="table-header-input" placeholder="Col ${colCount}" value="Col ${colCount}">`;
+    header.insertBefore(newTh, colorTh);
+
+    tbody.querySelectorAll('tr').forEach(row => {
+        const colorTd = row.querySelector('td:nth-last-child(2)');
+        const newTd = document.createElement('td');
+        newTd.innerHTML = `<input type="number" class="table-input" placeholder="0">`;
+        row.insertBefore(newTd, colorTd);
+    });
+}
+
+function removeColTV() {
+    const header = document.getElementById('cat-tv-header');
+    const tbody = document.getElementById('cat-tv-tbody');
+    const colCount = header.querySelectorAll('th').length - 3;
+
+    if (colCount <= 1) return;
+
+    header.querySelector('th:nth-last-child(3)').remove();
+
+    tbody.querySelectorAll('tr').forEach(row => {
+        row.querySelector('td:nth-last-child(3)').remove();
+    });
+}
+
+function generateCatTV() {
+    const header = document.getElementById('cat-tv-header');
+    const tbody = document.getElementById('cat-tv-tbody');
+    const rows = tbody.querySelectorAll('tr');
+    const chartType = document.getElementById('cat-tv-charttype').value;
+    const var1 = document.getElementById('cat-tv-var1').value.trim() || 'Variable 1';
+    const var2 = document.getElementById('cat-tv-var2').value.trim() || 'Variable 2';
+
+    // Get column names from header
+    const headerThs = Array.from(header.querySelectorAll('th'));
+    const colNames = headerThs.slice(1, headerThs.length - 2).map(th => {
+        const input = th.querySelector('input');
+        return input ? input.value.trim() || 'Col' : 'Col';
+    });
+    const colCount = colNames.length;
+
+    // Read row labels, colors, and data
+    const rowLabels = [];
+    const rowColors = [];
+    const tableData = [];
+
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const rowLabel = inputs[0].value.trim();
+        const color = inputs[inputs.length - 1].value;
+        if (!rowLabel) return;
+
+        rowLabels.push(rowLabel);
+        rowColors.push(color);
+
+        const rowData = [];
+        for (let i = 0; i < colCount; i++) {
+            rowData.push(parseFloat(inputs[i + 1].value) || 0);
+        }
+        tableData.push(rowData);
+    });
+
+    if (rowLabels.length === 0) return;
+
+    // Show canvas
+    const canvas = document.getElementById('cat-tv-chart');
+    canvas.style.display = 'block';
+    canvas.previousElementSibling.style.display = 'none';
+
+    if (catTVChart) catTVChart.destroy();
+
+    if (chartType === 'side-by-side') {
+        catTVChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: colNames,
+                datasets: rowLabels.map((label, i) => ({
+                    label: label,
+                    data: tableData[i],
+                    backgroundColor: rowColors[i],
+                    borderRadius: 4,
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#AAAAAA' } },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}` } }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: var2, color: '#AAAAAA' },
+                        ticks: { color: '#AAAAAA' },
+                        grid: { color: '#2E2E2E' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Frequency', color: '#AAAAAA' },
+                        ticks: { color: '#AAAAAA' },
+                        grid: { color: '#2E2E2E' }
+                    }
+                }
+            }
+        });
+
+    } else if (chartType === 'segmented') {
+        const colTotals = colNames.map((_, ci) =>
+            tableData.reduce((sum, row) => sum + row[ci], 0)
+        );
+
+        catTVChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: colNames,
+                datasets: rowLabels.map((label, i) => ({
+                    label: label,
+                    data: colNames.map((_, ci) =>
+                        colTotals[ci] > 0 ? ((tableData[i][ci] / colTotals[ci]) * 100).toFixed(1) : 0
+                    ),
+                    backgroundColor: rowColors[i],
+                    borderRadius: 0,
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#AAAAAA' } },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}%` } }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: { display: true, text: var2, color: '#AAAAAA' },
+                        ticks: { color: '#AAAAAA' },
+                        grid: { color: '#2E2E2E' }
+                    },
+                    y: {
+                        stacked: true,
+                        max: 100,
+                        title: { display: true, text: 'Proportion (%)', color: '#AAAAAA' },
+                        ticks: { color: '#AAAAAA', callback: v => v + '%' },
+                        grid: { color: '#2E2E2E' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Stats — contingency table
+    const statsTbody = document.getElementById('cat-tv-stats-tbody');
+    const statsHeader = document.getElementById('cat-tv-stats-header');
+    statsTbody.innerHTML = '';
+
+    statsHeader.innerHTML = `<tr>
+        <th>${var1} \\ ${var2}</th>
+        ${colNames.map(c => `<th>${c}</th>`).join('')}
+        <th>Row Total</th>
+    </tr>`;
+
+    rowLabels.forEach((label, i) => {
+        const rowTotal = tableData[i].reduce((a, b) => a + b, 0);
+        statsTbody.innerHTML += `<tr>
+            <td>${label}</td>
+            ${tableData[i].map(v => `<td>${v}</td>`).join('')}
+            <td><strong>${rowTotal}</strong></td>
+        </tr>`;
+    });
+
+    const colTotals = colNames.map((_, ci) => tableData.reduce((sum, row) => sum + row[ci], 0));
+    const grandTotal = colTotals.reduce((a, b) => a + b, 0);
+    statsTbody.innerHTML += `<tr>
+        <td><strong>Col Total</strong></td>
+        ${colTotals.map(v => `<td><strong>${v}</strong></td>`).join('')}
+        <td><strong>${grandTotal}</strong></td>
+    </tr>`;
+
+    document.getElementById('cat-tv-stats').style.display = 'block';
+    document.querySelector('#cat-tv-stats').previousElementSibling.style.display = 'none';
+}
+
+function updateCatTVAppearance() {
+    if (!catTVChart) return;
+
+    const bg = document.getElementById('cat-tv-bg').value;
+    const axisColor = document.getElementById('cat-tv-axis-color').value;
+    const titleColor = document.getElementById('cat-tv-title-color').value;
+    const gridColor = document.getElementById('cat-tv-grid-color').value;
+
+    catTVChart.config.options.plugins.customCanvasBackgroundColor = { color: bg };
+
+    if (catTVChart.config.options.scales) {
+        const scales = catTVChart.config.options.scales;
+        if (scales.x) {
+            scales.x.ticks.color = axisColor;
+            scales.x.grid.color = gridColor;
+            if (scales.x.title) scales.x.title.color = titleColor;
+        }
+        if (scales.y) {
+            scales.y.ticks.color = axisColor;
+            scales.y.grid.color = gridColor;
+            if (scales.y.title) scales.y.title.color = titleColor;
+        }
+    }
+
+    if (catTVChart.config.options.plugins.legend) {
+        catTVChart.config.options.plugins.legend.labels.color = axisColor;
+    }
+
+    catTVChart.update();
+}
+
+function downloadCatTV() {
+    if (!catTVChart) return;
+    const link = document.createElement('a');
+    link.download = 'chart.png';
+    link.href = catTVChart.toBase64Image();
+    link.click();
+}
+
+async function copyCatTV() {
+    if (!catTVChart) return;
+    const dataUrl = catTVChart.toBase64Image();
+    const blob = await (await fetch(dataUrl)).blob();
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    alert('Chart copied to clipboard!');
 }

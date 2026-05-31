@@ -574,6 +574,92 @@
 
             <div class="page-divider"></div>
 
+            <div class="tool-container">
+                <div class="input-panel">
+
+                    <label class="input-label">Variable 1 Name (Rows)</label>
+                    <input id="cat-tv-var1" type="text" class="input-field" placeholder="e.g. Gender">
+
+                    <label class="input-label">Variable 2 Name (Columns)</label>
+                    <input id="cat-tv-var2" type="text" class="input-field" placeholder="e.g. Favorite Pet">
+
+                    <label class="input-label">Data</label>
+                    <div style="overflow-x: auto;">
+                        <table class="input-table" id="cat-tv-table">
+                            <thead>
+                                <tr id="cat-tv-header">
+                                    <th>Variable 1 → Variable 2 ↓</th>
+                                    <th><input type="text" class="table-header-input" placeholder="Col 1" value="Col 1"></th>
+                                    <th>Color</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cat-tv-tbody">
+                                <tr>
+                                    <td><input type="text" class="table-input" placeholder="Row 1"></td>
+                                    <td><input type="number" class="table-input" placeholder="0"></td>
+                                    <td><input type="color" class="color-input" value="#5897cb"></td>
+                                    <td><button class="remove-row-button" onclick="removeRow(this)"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <button class="add-row-button" onclick="addRowTV()">+ Row</button>
+                    <button class="add-row-button" onclick="addColTV()">+ Column</button>
+                    <button class="add-row-button" onclick="removeColTV()">- Column</button>
+
+                    <label class="input-label">Chart Type</label>
+                    <select class="input-select" id="cat-tv-charttype">
+                        <option value="side-by-side">Side-by-Side Bar Chart</option>
+                        <option value="segmented">Segmented Bar Chart</option>
+                    </select>
+
+                    <button class="generate-button" onclick="generateCatTV()">Generate Chart</button>
+                </div>
+
+                <div class="output-panel">
+                    <p class="output-placeholder">Enter data and press generate to see the chart.</p>
+                    <canvas id="cat-tv-chart" style="display:none;">    </canvas>
+                </div>
+            </div>
+
+            <div class="bottom-container">
+                <div class="stats-panel">
+                    <p class="output-placeholder">Stats will display here after generating the chart.</p>
+                    <div id="cat-tv-stats" style="display: none;">
+                        <table class="stats-table">
+                            <thead id="cat-tv-stats-header"></thead>
+                            <tbody id="cat-tv-stats-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="custom-panel">
+                    <p class="input-label">Export</p>
+                    <button class="custom-button" onclick="downloadCatTV()">Download as PNG</button>
+                    <button class="custom-button" onclick="copyCatTV()">Copy to Clipboard</button>
+
+                    <div class="page-divider"></div>
+
+                    <p class="input-label">Chart Appearance</p>
+
+                    <label class="input-label">Chart Background</label>
+                    <input type="color" class="color-input" id="cat-tv-bg" value="#ffffff" oninput="updateCatTVAppearance()">
+
+                    <label class="input-label">Axis Label Colors</label>
+                    <input type="color" class="color-input" id="cat-tv-axis-color" value="#aaaaaa" oninput="updateCatTVAppearance()">
+
+                    <label class="input-label">Title Color</label>
+                    <input type="color" class="color-input" id="cat-tv-title-color" value="#ffffff" oninput="updateCatTVAppearance()">
+
+                    <label class="input-label">Gridline Color</label>
+                    <input type="color" class="color-input" id="cat-tv-grid-color" value="#2e2e2e" oninput="updateCatTVAppearance()">
+                </div>
+            </div>
+
+
 
         </div>
 
