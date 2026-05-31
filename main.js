@@ -395,19 +395,19 @@ function addGroupOM() {
     const tbody = document.getElementById('cat-om-tbody');
     const groupCount = header.querySelectorAll('th').length - 1;
 
-    // Add header
+    // Add header before last th (the empty X column)
     const lastTh = header.querySelector('th:last-child');
     const newTh = document.createElement('th');
     newTh.innerHTML = `<input type="text" class="table-header-input" placeholder="Group ${groupCount}" value="Group ${groupCount}">`;
     header.insertBefore(newTh, lastTh);
 
-    // Add color picker to color row
+    // Add color picker before last td in color row
     const lastColorTd = colorRow.querySelector('td:last-child');
     const newColorTd = document.createElement('td');
     newColorTd.innerHTML = `<input type="color" class="color-input" value="#5897cb">`;
     colorRow.insertBefore(newColorTd, lastColorTd);
 
-    // Add number input to each data row
+    // Add number input before last td (X button) in each data row
     tbody.querySelectorAll('tr').forEach(row => {
         const lastTd = row.querySelector('td:last-child');
         const newTd = document.createElement('td');
