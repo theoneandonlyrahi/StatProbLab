@@ -2,7 +2,7 @@
 
 An interactive statistics and probability learning tool built for students and educators. StatProbLab provides a clean, modern alternative to tools like Stapplet, with a focus on visualization, simulation, and hands-on exploration of statistical concepts.
 
-Live Site: https://theoneandonlyrahi.github.io/StatProbLab/
+Live Sites: https://theoneandonlyrahi.github.io/StatProbLab/ and https://stat-prob-lab.vercel.app/
 (might be blocked by your IT; contact them to whitelist it)
 
 ---
