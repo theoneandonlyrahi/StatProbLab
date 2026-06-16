@@ -5,6 +5,7 @@
     <title>StatProbLab</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
 
@@ -676,7 +677,86 @@
 
             <div class="page-divider"></div>
 
+            <div class="tool-container">
+                <div class="input-panel">
 
+                    <label class="input-label">Variable Name</label>
+                    <input id="quan-os-varname" type="text" class="input-field" placeholder="e.g. Dollars Earned">
+
+                    <label class="input-label">Data (comma separated)</label>
+                    <textarea class="input-field" id="quan-os-data" placeholder="e.g. 1, 1, 3, 5, 8"></textarea>
+
+                    <label class="input-label">Chart Type</label>
+                    <select class="input-select" id="quan-os-charttype">
+                        <option value="dotplot">Dot Plot</option>
+                        <option value="histogram">Histogram</option>
+                        <option value="boxplot">Box Plot</option>
+                        <option value="stemplot">Stem Plot</option>
+                    </select>
+
+                    <button class="generate-button" onclick="generateQuanOS()">Generate Chart</button>
+                </div>
+
+                <div class="output-panel">
+                    <p class="output-placeholder">Enter data and press generate to see the chart.</p>
+                    <canvas id="quan-os-chart" style="display: none;"></canvas>
+                </div>
+            </div>
+
+            <div class="bottom-container">
+                <div class="stats-panel">
+                    <p class="output-placeholder">Stats will appear here after generating the chart.</p>
+                    <div id="quan-os-stats" style="display:none;">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Bin</th>
+                                    <th>Count</th>
+                                    <th>Relative Frequency</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quan-os-stats-tbody"></tbody>
+                        </table>
+
+                        <div class="stat-summary">
+                            <p><span class="stat-label">n:</span> <span id="quan-os-n"></span> &nbsp; <span class="stat-label">Min:</span> <span id="quan-os-min"></span> &nbsp; <span class="stat-label">Max:</span> <span id="quan-os-max"></span></p>
+                            <p><span class="stat-label">Range:</span> <span id="quan-os-range"></span> &nbsp; <span class="stat-label">IQR:</span> <span id="quan-os-iqr"></span></p>
+                            <p><span class="stat-label">Q1:</span> <span id="quan-os-q1"></span> &nbsp; <span class="stat-label">Q3:</span> <span id="quan-os-q3"></span></p>
+                            <p><span class="stat-label">Mean:</span> <span id="quan-os-mean"></span> &nbsp; <span class="stat-label">Median:</span> <span id="quan-os-median"></span></p>
+                            <p><span class="stat-label">Mode:</span> <span id="quan-os-mode"></span> &nbsp; <span class="stat-label">Standard Dev:</span> <span id="quan-os-sd"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-panel">
+                    <p class="input-label">Export</p>
+                    <button class="custom-button" onclick="downloadQuanOS()">Download as PNG</button>
+                    <button class="custom-button" onclick="copyQuanOS()">Copy to Clipboard</button>
+
+                    <div class="page-divider"></div>
+
+                    <p class="input-label">Chart Appearance</p>
+
+                    <label class="input-label">Chart Background</label>
+                    <input type="color" class="color-input" id="quan-os-bg" value="#242424" oninput="updateQuanOSAppearance()">
+
+                    <label class="input-label">Axis Label Color</label>
+                    <input type="color" class="color-input" id="quan-os-axis-color" value="#aaaaaa" oninput="updateQuanOSAppearance()">
+
+                    <label class="inputLabel">Title Color</label>
+                    <input type="color" class="color-input" id="quan-os-title-color" value="#ffffff" oninput="updateQuanOSAppearance()">
+
+                    <label class="input-label">Gridline Color</label>
+                    <input type="color" class="color-input" id="quan-os-grid-color" value="#2e2e2e" oninput="updateQuanOSAppearance()">
+
+                    <label class="input-label">Bar Color</label>
+                    <input type="color" class="color-input" id="quan-os-bar-color" value="#dc5353" oninput="updateQuanOSAppearance()">
+
+                    <label class="input-label">Dot Radius</label>
+                    <input type="range" min="2" max="15" value="5" class="input-field" id="quan-os-dot-radius" oninput="updateQuanOSAppearance()">
+
+                </div>
+            </div>
         </div>
 
         <!---One Variable Multiple Groups -->

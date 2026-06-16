@@ -47,6 +47,7 @@ Chart.register({
     }
 });
 
+// Categorical Cards
 //  One Variable Single Group Categorical 
 let catOSChart = null;
 
@@ -272,6 +273,7 @@ async function copyCatOS() {
 //  One Variable Multi Group Categorical 
 let catOMChart = null;
 
+// Generate Chart
 function generateCatOM() {
     const header = document.getElementById('cat-om-header');
     const colorRow = document.getElementById('cat-om-colors');
@@ -370,6 +372,7 @@ function generateCatOM() {
     document.querySelector('#cat-om-stats').previousElementSibling.style.display = 'none';
 }
 
+// Add new row
 function addRowOM() {
     const tbody = document.getElementById('cat-om-tbody');
     const header = document.getElementById('cat-om-header');
@@ -389,6 +392,7 @@ function addRowOM() {
     tbody.appendChild(row);
 }
 
+// Add new group
 function addGroupOM() {
     const header = document.getElementById('cat-om-header');
     const colorRow = document.getElementById('cat-om-colors');
@@ -416,6 +420,7 @@ function addGroupOM() {
     });
 }
 
+// remov group
 function removeGroupOM() {
     const header = document.getElementById('cat-om-header');
     const colorRow = document.getElementById('cat-om-colors');
@@ -499,6 +504,7 @@ function updateCatOMAppearance() {
 // Two Variables Categorical
 let catTVChart = null;
 
+// Add row
 function addRowTV() {
     const header = document.getElementById('cat-tv-header');
     const tbody = document.getElementById('cat-tv-tbody');
@@ -516,6 +522,7 @@ function addRowTV() {
     tbody.appendChild(row);
 }
 
+// Add ciolumn
 function addColTV() {
     const header = document.getElementById('cat-tv-header');
     const tbody = document.getElementById('cat-tv-tbody');
@@ -534,6 +541,7 @@ function addColTV() {
     });
 }
 
+// Remove column
 function removeColTV() {
     const header = document.getElementById('cat-tv-header');
     const tbody = document.getElementById('cat-tv-tbody');
@@ -548,6 +556,7 @@ function removeColTV() {
     });
 }
 
+// Generate chart
 function generateCatTV() {
     const header = document.getElementById('cat-tv-header');
     const tbody = document.getElementById('cat-tv-tbody');
@@ -702,6 +711,7 @@ function generateCatTV() {
     document.querySelector('#cat-tv-stats').previousElementSibling.style.display = 'none';
 }
 
+// Update chart
 function updateCatTVAppearance() {
     if (!catTVChart) return;
 
@@ -733,6 +743,7 @@ function updateCatTVAppearance() {
     catTVChart.update();
 }
 
+// Download chart
 function downloadCatTV() {
     if (!catTVChart) return;
     const link = document.createElement('a');
@@ -741,9 +752,452 @@ function downloadCatTV() {
     link.click();
 }
 
+// Copy chart
 async function copyCatTV() {
     if (!catTVChart) return;
     const dataUrl = catTVChart.toBase64Image();
+    const blob = await (await fetch(dataUrl)).blob();
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    alert('Chart copied to clipboard!');
+}
+
+// Quantitative Cards
+// One Variable Single Group Quantitative
+let quanOSChart = null;
+
+// Auto-grow textarea
+document.getElementById('quan-os-data').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+});
+
+function generateQuanOS() {
+
+    // Read inputs 
+    const raw = document.getElementById('quan-os-data').value;
+    const varName = document.getElementById('quan-os-varname').value.trim() || 'Variable';
+    const chartType = document.getElementById('quan-os-charttype').value;
+    const barColor = document.getElementById('quan-os-bar-color').value;
+
+    // Separate
+    const values = raw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+    if (values.length === 0) return;
+
+    const sorted = [...values].sort((a, b) => a - b);
+    const n = values.length;
+
+    // Show canvas & hide placeholder
+    const canvas = document.getElementById('quan-os-chart');
+    canvas.style.display = 'block';
+    canvas.previousElementSibling.style.display = 'none';
+
+    if (quanOSChart) quanOSChart.destroy();
+    const oldDot = document.querySelector('.dotplot-div');
+    if (oldDot) oldDot.remove();
+    canvas.style.display = 'block';
+
+    // Draw chart
+    if (chartType === 'histogram') {
+
+        // Calculate bins using Sturges rule: k = ceil(log2(n) + 1)
+        const binCount = Math.ceil(Math.log2(n) + 1);
+        const min = sorted[0];
+        const max = sorted[sorted.length - 1];
+        const binWidth = (max - min) / binCount;
+
+        // Build bins
+        const bins = Array.from({ length: binCount }, (_, i) => ({
+            start: min + i * binWidth,
+            end: min + (i + 1) * binWidth,
+            count: 0
+        }));
+
+        // Count values into bins
+        values.forEach(v => {
+            const idx = Math.min(Math.floor((v - min) / binWidth), binCount - 1);
+            bins[idx].count++;
+        });
+
+        const binLabels = bins.map(b => `${b.start.toFixed(1)} – ${b.end.toFixed(1)}`);
+        const binCounts = bins.map(b => b.count);
+
+        quanOSChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: binLabels,
+                datasets: [{
+                    label: 'Frequency',
+                    data: binCounts,
+                    backgroundColor: barColor,
+                    borderColor: barColor,
+                    borderWidth: 1,
+                    borderRadius: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const pct = ((ctx.raw / n) * 100).toFixed(1);
+                                return `Count: ${ctx.raw}  (${pct}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: varName, color: '#AAAAAA' },
+                        ticks: { color: '#AAAAAA', maxRotation: 45 },
+                        grid: { color: '#2E2E2E' },
+                        categoryPercentage: 1.0,
+                        barPercentage: 1.0,     // removes gaps between bars
+                    },
+                    y: {
+                        title: { display: true, text: 'Frequency', color: '#AAAAAA' },
+                        ticks: { color: '#AAAAAA' },
+                        grid: { color: '#2E2E2E' }
+                    }
+                }
+            }
+        });
+
+        // Show frequency table
+        const statsTbody = document.getElementById('quan-os-stats-tbody');
+        statsTbody.innerHTML = '';
+        bins.forEach(bin => {
+            const pct = ((bin.count / n) * 100).toFixed(1);
+            statsTbody.innerHTML += `<tr>
+                <td>${bin.start.toFixed(1)} – ${bin.end.toFixed(1)}</td>
+                <td>${bin.count}</td>
+                <td>${pct}%</td>
+            </tr>`;
+        });
+
+    } else if (chartType === 'dotplot') {
+
+        const freqCounts = {};
+        values.forEach(v => freqCounts[v] = (freqCounts[v] || 0) + 1);
+        const maxStack = Math.max(...Object.values(freqCounts));
+        const uniqueVals = Object.keys(freqCounts).map(Number).sort((a, b) => a - b);
+
+        const dotRadius = parseInt(document.getElementById('quan-os-dot-radius').value);
+        const padding = dotRadius * 2 + 2;
+        const margin = { top: 20, right: 20, bottom: 40, left: 20 };
+
+        const parent = canvas.parentElement;
+        const W = parent.clientWidth - 40;
+        const H = margin.top + (maxStack * padding) + dotRadius + margin.bottom;
+
+        canvas.width = W;
+        canvas.height = H;
+        canvas.style.display = 'block';
+        canvas.style.height = 'auto';
+
+        const ctx2d = canvas.getContext('2d');
+        const plotW = W - margin.left - margin.right;
+        const baseY = H - margin.bottom;
+
+        const minVal = sorted[0];
+        const maxVal = sorted[sorted.length - 1];
+        const toX = v => margin.left + ((v - minVal) / (maxVal - minVal || 1)) * plotW;
+
+        // Background
+        ctx2d.fillStyle = document.getElementById('quan-os-bg').value;
+        ctx2d.fillRect(0, 0, W, H);
+
+        // Axis line
+        ctx2d.strokeStyle = document.getElementById('quan-os-axis-color').value;
+        ctx2d.lineWidth = 1;
+        ctx2d.beginPath();
+        ctx2d.moveTo(margin.left, baseY);
+        ctx2d.lineTo(margin.left + plotW, baseY);
+        ctx2d.stroke();
+
+        // Ticks and labels with equal intervals
+        const tickCount = 10;
+        const tickStep = (maxVal - minVal) / tickCount;
+        ctx2d.fillStyle = document.getElementById('quan-os-axis-color').value;
+        ctx2d.font = '11px Montserrat, sans-serif';
+        ctx2d.textAlign = 'center';
+        for (let i = 0; i <= tickCount; i++) {
+            const v = minVal + i * tickStep;
+            const x = toX(v);
+            ctx2d.beginPath();
+            ctx2d.moveTo(x, baseY);
+            ctx2d.lineTo(x, baseY + 5);
+            ctx2d.strokeStyle = document.getElementById('quan-os-axis-color').value;
+            ctx2d.stroke();
+            ctx2d.fillText(Math.round(v), x, baseY + 18);
+        }
+
+        // X label
+        ctx2d.fillStyle = document.getElementById('quan-os-axis-color').value;
+        ctx2d.font = '12px Montserrat, sans-serif';
+        ctx2d.fillText(varName, margin.left + plotW / 2, H - 4);
+
+        // Dots
+        uniqueVals.forEach(v => {
+            const x = toX(v);
+            for (let i = 0; i < freqCounts[v]; i++) {
+                const y = baseY - dotRadius - (i * padding);
+                ctx2d.beginPath();
+                ctx2d.arc(x, y, dotRadius, 0, Math.PI * 2);
+                ctx2d.fillStyle = barColor;
+                ctx2d.fill();
+            }
+        });
+
+        document.getElementById('quan-os-stats-tbody').innerHTML = '';
+
+    } else if (chartType === 'boxplot') {
+
+        const q1 = calcQuartile(sorted, 0.25);
+        const median = calcMedian(sorted);
+        const q3 = calcQuartile(sorted, 0.75);
+        const min = sorted[0];
+        const max = sorted[sorted.length - 1];
+
+        quanOSChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: [varName],
+                datasets: [
+                    // Lower whisker to Q1 (invisible filler)
+                    {
+                        label: 'Min to Q1',
+                        data: [[min, q1]],
+                        backgroundColor: 'transparent',
+                        borderColor: barColor,
+                        borderWidth: 2,
+                        borderSkipped: false,
+                    },
+                    // Q1 to Median (box lower half)
+                    {
+                        label: 'Q1 to Median',
+                        data: [[q1, median]],
+                        backgroundColor: barColor + '88',
+                        borderColor: barColor,
+                        borderWidth: 2,
+                        borderSkipped: false,
+                    },
+                    // Median to Q3 (box upper half)
+                    {
+                        label: 'Median to Q3',
+                        data: [[median, q3]],
+                        backgroundColor: barColor + '44',
+                        borderColor: barColor,
+                        borderWidth: 2,
+                        borderSkipped: false,
+                    },
+                    // Q3 to Max (invisible filler)
+                    {
+                        label: 'Q3 to Max',
+                        data: [[q3, max]],
+                        backgroundColor: 'transparent',
+                        borderColor: barColor,
+                        borderWidth: 2,
+                        borderSkipped: false,
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const labels = ['Min–Q1', 'Q1–Median', 'Median–Q3', 'Q3–Max'];
+                                return labels[ctx.datasetIndex];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: varName, color: '#AAAAAA' },
+                        ticks: { color: '#AAAAAA' },
+                        grid: { color: '#2E2E2E' }
+                    },
+                    y: {
+                        ticks: { color: '#AAAAAA' },
+                        grid: { color: '#2E2E2E' }
+                    }
+                }
+            }
+        });
+
+        document.getElementById('quan-os-stats-tbody').innerHTML = '';
+
+    } else if (chartType === 'stemplot') {
+
+        // Stem plot is text-based
+        canvas.style.display = 'none';
+        canvas.previousElementSibling.style.display = 'none';
+
+        // Build stem and leaf
+        const stemMap = {};
+        sorted.forEach(v => {
+            const stem = Math.floor(v / 10);
+            const leaf = Math.abs(v % 10);
+            if (!stemMap[stem]) stemMap[stem] = [];
+            stemMap[stem].push(leaf);
+        });
+
+        let html = `<div class="stemplot">
+            <p class="input-label" style="margin-bottom:8px;">Stem | Leaf  (${varName})</p>
+            <table class="stats-table">`;
+        Object.keys(stemMap).sort((a, b) => a - b).forEach(stem => {
+            html += `<tr><td style="text-align:right; padding-right:8px; border-right: 1px solid #444;">${stem}</td>
+                     <td style="padding-left:8px;">${stemMap[stem].join('  ')}</td></tr>`;
+        });
+        html += `</table></div>`;
+
+        // Inject into output panel
+        const outputPanel = canvas.parentElement;
+        let stemDiv = outputPanel.querySelector('.stemplot');
+        if (stemDiv) stemDiv.remove();
+        outputPanel.insertAdjacentHTML('beforeend', html);
+
+        document.getElementById('quan-os-stats-tbody').innerHTML = '';
+    }
+
+    // Calculate and display summary stats
+    const min = sorted[0];
+    const max = sorted[sorted.length - 1];
+    const mean = values.reduce((a, b) => a + b, 0) / n;
+    const median = calcMedian(sorted);
+    const q1 = calcQuartile(sorted, 0.25);
+    const q3 = calcQuartile(sorted, 0.75);
+
+    // Mode
+    const counts = {};
+    values.forEach(v => counts[v] = (counts[v] || 0) + 1);
+    const maxCount = Math.max(...Object.values(counts));
+    const modes = Object.keys(counts).filter(k => counts[k] === maxCount).map(Number);
+    const modeStr = maxCount === 1 ? 'None' : modes.join(', ');
+
+    // Sample standard deviation
+    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (n - 1);
+    const sd = Math.sqrt(variance);
+
+    document.getElementById('quan-os-n').textContent = n;
+    document.getElementById('quan-os-min').textContent = min;
+    document.getElementById('quan-os-max').textContent = max;
+    document.getElementById('quan-os-range').textContent = (max - min).toFixed(2);
+    document.getElementById('quan-os-iqr').textContent = (q3 - q1).toFixed(2);
+    document.getElementById('quan-os-q1').textContent = q1.toFixed(2);
+    document.getElementById('quan-os-q3').textContent = q3.toFixed(2);
+    document.getElementById('quan-os-mean').textContent = mean.toFixed(2);
+    document.getElementById('quan-os-median').textContent = median.toFixed(2);
+    document.getElementById('quan-os-mode').textContent = modeStr;
+    document.getElementById('quan-os-sd').textContent = sd.toFixed(2);
+
+    // Show stats, hide placeholder
+    document.getElementById('quan-os-stats').style.display = 'block';
+    document.querySelector('#quan-os-stats').previousElementSibling.style.display = 'none';
+}
+
+// Helper functions
+
+function calcMedian(sorted) {
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+function calcQuartile(sorted, q) {
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    return sorted[base + 1] !== undefined
+        ? sorted[base] + rest * (sorted[base + 1] - sorted[base])
+        : sorted[base];
+}
+
+// Appearance
+
+function updateQuanOSAppearance() {
+    const chartType = document.getElementById('quan-os-charttype').value;
+    if (chartType === 'dotplot') {
+        generateQuanOS();
+        return;
+    }
+    
+    if (!quanOSChart) return;
+
+    const bg = document.getElementById('quan-os-bg').value;
+    const axisColor = document.getElementById('quan-os-axis-color').value;
+    const titleColor = document.getElementById('quan-os-title-color').value;
+    const gridColor = document.getElementById('quan-os-grid-color').value;
+    const barColor = document.getElementById('quan-os-bar-color').value;
+
+    quanOSChart.config.options.plugins.customCanvasBackgroundColor = { color: bg };
+
+    if (quanOSChart.config.options.scales) {
+        const scales = quanOSChart.config.options.scales;
+        if (scales.x) {
+            scales.x.ticks.color = axisColor;
+            scales.x.grid.color = gridColor;
+            if (scales.x.title) scales.x.title.color = titleColor;
+        }
+        if (scales.y) {
+            scales.y.ticks.color = axisColor;
+            scales.y.grid.color = gridColor;
+            if (scales.y.title) scales.y.title.color = titleColor;
+        }
+    }
+
+    if (quanOSChart.config.options.plugins.legend) {
+        quanOSChart.config.options.plugins.legend.labels.color = axisColor;
+    }
+
+    // Update bar color live
+    quanOSChart.data.datasets.forEach(ds => {
+        if (ds.backgroundColor !== 'transparent') {
+            ds.backgroundColor = barColor;
+            ds.borderColor = barColor;
+        }
+    });
+
+    quanOSChart.update();
+}
+
+// Export
+
+function downloadQuanOS() {
+    const canvas = document.getElementById('quan-os-chart');
+    const chartType = document.getElementById('quan-os-charttype').value;
+    if (chartType === 'dotplot') {
+        const link = document.createElement('a');
+        link.download = 'chart.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        return;
+    }
+    if (!quanOSChart) return;
+    const link = document.createElement('a');
+    link.download = 'chart.png';
+    link.href = quanOSChart.toBase64Image();
+    link.click();
+}
+
+async function copyQuanOS() {
+    const chartType = document.getElementById('quan-os-charttype').value;
+    const canvas = document.getElementById('quan-os-chart');
+    if (chartType === 'dotplot') {
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        alert('Chart copied to clipboard!');
+        return;
+    }
+    if (!quanOSChart) return;
+    const dataUrl = quanOSChart.toBase64Image();
     const blob = await (await fetch(dataUrl)).blob();
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
     alert('Chart copied to clipboard!');

@@ -572,3 +572,9 @@ a:hover {
 
 #cat-one-single .generate-button { background: #5897cb; }
 #cat-one-single .generate-button:hover { background: #79c3ff; }
+
+#quan-os-data {
+    resize: none;
+    overflow: hidden;
+    min-height: 60px;
+}
