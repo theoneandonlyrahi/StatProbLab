@@ -212,7 +212,7 @@ function generateCatOS() {
     document.querySelector('#cat-os-stats').previousElementSibling.style.display = 'none';
 }
 
-// Update Chart CatOS Apperanace
+// Update Chart CatOS Appearance
 function updateCatOSAppearance() {
     if (!catOSChart) return;
 
@@ -420,7 +420,7 @@ function addGroupOM() {
     });
 }
 
-// remov group
+// Remove group
 function removeGroupOM() {
     const header = document.getElementById('cat-om-header');
     const colorRow = document.getElementById('cat-om-colors');
@@ -463,7 +463,7 @@ async function copyCatOM() {
     alert('Chart copied to clipboard!');
 }
 
-// Update Chart CatOM Apperanace
+// Update Chart CatOM Appearance
 function updateCatOMAppearance() {
     if (!catOMChart) return;
 
@@ -522,7 +522,7 @@ function addRowTV() {
     tbody.appendChild(row);
 }
 
-// Add ciolumn
+// Add column
 function addColTV() {
     const header = document.getElementById('cat-tv-header');
     const tbody = document.getElementById('cat-tv-tbody');
@@ -792,14 +792,12 @@ function generateQuanOS() {
     canvas.previousElementSibling.style.display = 'none';
 
     if (quanOSChart) quanOSChart.destroy();
-    const oldDot = document.querySelector('.dotplot-div');
-    if (oldDot) oldDot.remove();
     canvas.style.display = 'block';
 
     // Draw chart
     if (chartType === 'histogram') {
 
-        // Calculate bins using Sturges rule: k = ceil(log2(n) + 1)
+        // Calculate bins using Sturges' formula where k = ceil(log_2 of (n) + 1)
         const binCount = Math.ceil(Math.log2(n) + 1);
         const min = sorted[0];
         const max = sorted[sorted.length - 1];
@@ -930,7 +928,7 @@ function generateQuanOS() {
             ctx2d.lineTo(x, baseY + 5);
             ctx2d.strokeStyle = document.getElementById('quan-os-axis-color').value;
             ctx2d.stroke();
-            ctx2d.fillText(Math.round(v), x, baseY + 18);
+            ctx2d.fillText(v.toFixed(2), x, baseY + 18);
         }
 
         // X label
@@ -1057,7 +1055,7 @@ function generateQuanOS() {
         });
         html += `</table></div>`;
 
-        // Inject into output panel
+        // Display into output panel
         const outputPanel = canvas.parentElement;
         let stemDiv = outputPanel.querySelector('.stemplot');
         if (stemDiv) stemDiv.remove();
