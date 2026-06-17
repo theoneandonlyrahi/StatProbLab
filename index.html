@@ -723,6 +723,19 @@
                             <p><span class="stat-label">Q1:</span> <span id="quan-os-q1"></span> &nbsp; <span class="stat-label">Q3:</span> <span id="quan-os-q3"></span></p>
                             <p><span class="stat-label">Mean:</span> <span id="quan-os-mean"></span> &nbsp; <span class="stat-label">Median:</span> <span id="quan-os-median"></span></p>
                             <p><span class="stat-label">Mode:</span> <span id="quan-os-mode"></span> &nbsp; <span class="stat-label">Standard Dev:</span> <span id="quan-os-sd"></span></p>
+
+                            <p><span class="input-label">Percentile Calculator</span></p>
+                            <label class="input-label">Value to Percentile</label>
+                            <input type="number" class="input-field" id="quan-os-percentile-value" placeholder="e.g. 42">
+                            <button class="custom-button" onclick="calculateQuanOSPercentile()">Calculate</button>
+                            <p id="quan-os-percentile-result" style="color: #AAAAAA; font-size: 13px;"></p>
+
+                            <div style="height: 10px;"></div>
+
+                            <label class="input-label">Percentile to Value</label>
+                            <input type="number" class="input-field" id="quan-os-reverse-value" placeholder="e.g. 75">
+                            <button class="custom-button" onclick="calculateQuanOSReverse()">Calculate</button>
+                            <p id="quan-os-reverse-result" style="color: #AAAAAA; font-size: 13px;"></p>
                         </div>
                     </div>
                 </div>

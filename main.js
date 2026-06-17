@@ -33,7 +33,7 @@ function removeRow(btn) {
 // Import Chart.js universally
 // I barely knew anything so I relied heavily on the documentation and examples, but I wrapped it in a function to make it easy to use across different tools. The function reads data from a table, generates the appropriate chart based on user selection, and updates stats accordingly. I also made sure to destroy any existing chart before creating a new one to prevent display issues.
 
-//Register chart color
+// Register chart color
 Chart.register({
     id: 'customCanvasBackgroundColor',
     beforeDraw: (chart) => {
@@ -950,6 +950,105 @@ function generateQuanOS() {
 
         document.getElementById('quan-os-stats-tbody').innerHTML = '';
 
+        const dotPositions = [];
+        uniqueVals.forEach(v => {
+            const x = toX(v);
+            for (let i = 0; i < freqCounts[v]; i++) {
+                const y = baseY - dotRadius - (i * padding);
+                dotPositions.push({ x, y, value: v });
+            }
+        });
+
+        function drawDotPlot(hoveredDot) {
+            ctx2d.clearRect(0, 0, W, H);
+
+            ctx2d.fillStyle = document.getElementById('quan-os-bg').value;
+            ctx2d.fillRect(0, 0, W, H);
+
+            ctx2d.strokeStyle = document.getElementById('quan-os-axis-color').value;
+            ctx2d.lineWidth = 1;
+            ctx2d.beginPath();
+            ctx2d.moveTo(margin.left, baseY);
+            ctx2d.lineTo(margin.left + plotW, baseY);
+            ctx2d.stroke();
+
+            const tickCount = 10;
+            const tickStep = (maxVal - minVal) / tickCount;
+            ctx2d.fillStyle = document.getElementById('quan-os-axis-color').value;
+            ctx2d.font = '11px Montserrat, sans-serif';
+            ctx2d.textAlign = 'center';
+            for (let i = 0; i <= tickCount; i++) {
+                const v = minVal + i * tickStep;
+                const x = toX(v);
+                ctx2d.beginPath();
+                ctx2d.moveTo(x, baseY);
+                ctx2d.lineTo(x, baseY + 5);
+                ctx2d.strokeStyle = document.getElementById('quan-os-axis-color').value;
+                ctx2d.stroke();
+                ctx2d.fillText(v.toFixed(2), x, baseY + 18);
+            }
+
+            ctx2d.fillStyle = document.getElementById('quan-os-axis-color').value;
+            ctx2d.font = '12px Montserrat, sans-serif';
+            ctx2d.fillText(varName, margin.left + plotW / 2, H - 4);
+
+            dotPositions.forEach(dot => {
+                const isHovered = hoveredDot &&
+                    Math.abs(dot.x - hoveredDot.x) < 1 &&
+                    Math.abs(dot.y - hoveredDot.y) < 1;
+
+                ctx2d.beginPath();
+                ctx2d.arc(dot.x, dot.y, isHovered ? dotRadius * 1.4 : dotRadius, 0, Math.PI * 2);
+                ctx2d.fillStyle = isHovered ? '#ffffff' : barColor;
+                ctx2d.fill();
+            });
+
+            // Show value
+            if (hoveredDot) {
+                const label = `${hoveredDot.value}`;
+                ctx2d.font = '12px Montserrat, sans-serif';
+                const tw = ctx2d.measureText(label).width;
+                const tx = Math.min(hoveredDot.x - tw / 2 - 6, W - tw - 20);
+                const ty = hoveredDot.y - dotRadius - 18;
+
+                ctx2d.fillStyle = '#333';
+                ctx2d.beginPath();
+                ctx2d.roundRect(tx, ty, tw + 12, 20, 4);
+                ctx2d.fill();
+
+                ctx2d.fillStyle = '#ffffff';
+                ctx2d.textAlign = 'left';
+                ctx2d.fillText(label, tx + 6, ty + 14);
+            }
+        }
+
+        drawDotPlot(null);
+
+        canvas._hoverHandler && canvas.removeEventListener('mousemove', canvas._hoverHandler);
+        canvas._leaveHandler && canvas.removeEventListener('mouseleave', canvas._leaveHandler);
+
+        canvas._hoverHandler = function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+
+            const hovered = dotPositions.find(dot =>
+                Math.sqrt((dot.x - mx) ** 2 + (dot.y - my) ** 2) <= dotRadius + 3
+            );
+            drawDotPlot(hovered || null);
+            canvas.style.cursor = hovered ? 'pointer' : 'default';
+        };
+
+        canvas._leaveHandler = function() {
+            drawDotPlot(null);
+            canvas.style.cursor = 'default';
+        };
+
+        canvas.addEventListener('mousemove', canvas._hoverHandler);
+        canvas.addEventListener('mouseleave', canvas._leaveHandler);
+
     } else if (chartType === 'boxplot') {
 
         const q1 = calcQuartile(sorted, 0.25);
@@ -1200,3 +1299,34 @@ async function copyQuanOS() {
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
     alert('Chart copied to clipboard!');
 }
+
+function calculateQuanOSPercentile() {
+    const input = parseFloat(document.getElementById('quan-os-percentile-value').value);
+    const result = document.getElementById('quan-os-percentile-result');
+    if (isNaN(input)) { result.textContent = 'Enter a valid number.'; return; }
+
+    const raw = document.getElementById('quan-os-data').value;
+    const sorted = raw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v)).sort((a, b) => a - b);
+    if (sorted.length === 0) { result.textContent = 'Generate a chart first.'; return; }
+
+    const below = sorted.filter(v => v < input).length;
+    const equal = sorted.filter(v => v === input).length;
+    const percentile = input >= sorted[sorted.length - 1] ? '100.0' : (((below + 0.5 * equal) / sorted.length) * 100).toFixed(1);
+
+    result.textContent = `${input} is at the ${percentile}th percentile.`;
+}
+
+function calculateQuanOSReverse() {
+    const input = parseFloat(document.getElementById('quan-os-reverse-value').value);
+    const result = document.getElementById('quan-os-reverse-result');
+    if (isNaN(input) || input < 0 || input > 100) { result.textContent = 'Enter a percentile between 0 and 100.'; return; }
+
+    const raw = document.getElementById('quan-os-data').value;
+    const sorted = raw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v)).sort((a, b) => a - b);
+    if (sorted.length === 0) { result.textContent = 'Generate a chart first.'; return; }
+
+    const value = input === 100 ? sorted[sorted.length - 1] : input === 0 ? sorted[0] : calcQuartile(sorted, input / 100);
+    result.textContent = `The ${input}th percentile is ${value.toFixed(2)}.`;
+}
+
+// Hi (Rahi) or reader. I am aware that there is a lack of commentation but that is because I followed tutorials and became lazy. This is a self-reminder to add comments & update!
