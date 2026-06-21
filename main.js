@@ -679,7 +679,7 @@ function generateCatTV() {
         });
     }
 
-    // Stats — contingency table
+    // Stats contingency table
     const statsTbody = document.getElementById('cat-tv-stats-tbody');
     const statsHeader = document.getElementById('cat-tv-stats-header');
     statsTbody.innerHTML = '';
@@ -772,6 +772,16 @@ document.getElementById('quan-os-data').addEventListener('input', function() {
 });
 
 function generateQuanOS() {
+    if (quanOSChart) quanOSChart.destroy();
+
+    const canvas = document.getElementById('quan-os-chart');
+    canvas.style.height = '';
+    canvas.style.width = '';
+    canvas.removeAttribute('width');
+    canvas.removeAttribute('height');
+
+    const oldStem = canvas.parentElement.querySelector('.stemplot');
+    if (oldStem) oldStem.remove();
 
     // Read inputs 
     const raw = document.getElementById('quan-os-data').value;
@@ -787,82 +797,182 @@ function generateQuanOS() {
     const n = values.length;
 
     // Show canvas & hide placeholder
-    const canvas = document.getElementById('quan-os-chart');
     canvas.style.display = 'block';
     canvas.previousElementSibling.style.display = 'none';
 
     if (quanOSChart) quanOSChart.destroy();
-    canvas.style.display = 'block';
+    quanOSChart = null;
 
-    // Draw chart
+    if (canvas._hoverHandler) {
+        canvas.removeEventListener('mousemove', canvas._hoverHandler);
+        canvas._hoverHandler = null;
+    }
+
+    if (canvas._leaveHandler) {
+        canvas.removeEventListener('mouseleave', canvas._leaveHandler);
+        canvas._leaveHandler = null;
+    }
+
+    canvas.style.cursor = 'default';
+
     if (chartType === 'histogram') {
 
-        // Calculate bins using Sturges' formula where k = ceil(log_2 of (n) + 1)
         const binCount = Math.ceil(Math.log2(n) + 1);
         const min = sorted[0];
         const max = sorted[sorted.length - 1];
-        const binWidth = (max - min) / binCount;
+        const binWidth = (max - min) / binCount || 1;
 
-        // Build bins
         const bins = Array.from({ length: binCount }, (_, i) => ({
             start: min + i * binWidth,
             end: min + (i + 1) * binWidth,
             count: 0
         }));
 
-        // Count values into bins
         values.forEach(v => {
             const idx = Math.min(Math.floor((v - min) / binWidth), binCount - 1);
             bins[idx].count++;
         });
 
-        const binLabels = bins.map(b => `${b.start.toFixed(1)} – ${b.end.toFixed(1)}`);
-        const binCounts = bins.map(b => b.count);
+        const maxCount = Math.max(...bins.map(b => b.count));
 
-        quanOSChart = new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: binLabels,
-                datasets: [{
-                    label: 'Frequency',
-                    data: binCounts,
-                    backgroundColor: barColor,
-                    borderColor: barColor,
-                    borderWidth: 1,
-                    borderRadius: 2,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => {
-                                const pct = ((ctx.raw / n) * 100).toFixed(1);
-                                return `Count: ${ctx.raw}  (${pct}%)`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        title: { display: true, text: varName, color: '#AAAAAA' },
-                        ticks: { color: '#AAAAAA', maxRotation: 45 },
-                        grid: { color: '#2E2E2E' },
-                        categoryPercentage: 1.0,
-                        barPercentage: 1.0,     // removes gaps between bars
-                    },
-                    y: {
-                        title: { display: true, text: 'Frequency', color: '#AAAAAA' },
-                        ticks: { color: '#AAAAAA' },
-                        grid: { color: '#2E2E2E' }
-                    }
+        const margin = { top: 20, right: 30, bottom: 60, left: 50 };
+        const parent = canvas.parentElement;
+        const W = parent.clientWidth - 40;
+        const H = 320;
+
+        canvas.width = W;
+        canvas.height = H;
+        canvas.style.display = 'block';
+        canvas.style.height = 'auto';
+
+        const ctx2d = canvas.getContext('2d');
+        const plotW = W - margin.left - margin.right;
+        const plotH = H - margin.top - margin.bottom;
+
+        const bg = document.getElementById('quan-os-bg').value;
+        const axisColor = document.getElementById('quan-os-axis-color').value;
+        const gridColor = document.getElementById('quan-os-grid-color').value;
+        const barColor = document.getElementById('quan-os-bar-color').value;
+
+        function drawHistogram(hoveredIdx) {
+            ctx2d.clearRect(0, 0, W, H);
+            ctx2d.fillStyle = bg;
+            ctx2d.fillRect(0, 0, W, H);
+
+            // Horizontal gridlines
+            const yTicks = 5;
+            ctx2d.strokeStyle = gridColor;
+            ctx2d.fillStyle = axisColor;
+            ctx2d.font = '11px Montserrat, sans-serif';
+            ctx2d.textAlign = 'right';
+            for (let i = 0; i <= yTicks; i++) {
+                const v = (maxCount / yTicks) * i;
+                const y = margin.top + plotH - (v / maxCount) * plotH;
+                ctx2d.beginPath();
+                ctx2d.moveTo(margin.left, y);
+                ctx2d.lineTo(margin.left + plotW, y);
+                ctx2d.stroke();
+                ctx2d.fillText(Math.round(v), margin.left - 8, y + 4);
+            }
+
+            // Bars
+            const barW = plotW / binCount;
+            bins.forEach((bin, i) => {
+                const barH = maxCount > 0 ? (bin.count / maxCount) * plotH : 0;
+                const x = margin.left + i * barW;
+                const y = margin.top + plotH - barH;
+                ctx2d.fillStyle = i === hoveredIdx ? '#ffffff' : barColor;
+                ctx2d.fillRect(x + 1, y, barW - 2, barH);
+            });
+
+            // X axis line
+            ctx2d.strokeStyle = axisColor;
+            ctx2d.beginPath();
+            ctx2d.moveTo(margin.left, margin.top + plotH);
+            ctx2d.lineTo(margin.left + plotW, margin.top + plotH);
+            ctx2d.stroke();
+
+            // X tick labels (bin edges)
+            ctx2d.fillStyle = axisColor;
+            ctx2d.textAlign = 'center';
+            bins.forEach((bin, i) => {
+                const x = margin.left + i * barW;
+                ctx2d.fillText(bin.start.toFixed(1), x, margin.top + plotH + 16);
+            });
+            ctx2d.fillText(bins[bins.length - 1].end.toFixed(1), margin.left + plotW, margin.top + plotH + 16);
+
+            // Axis titles
+            ctx2d.fillStyle = axisColor;
+            ctx2d.font = '12px Montserrat, sans-serif';
+            ctx2d.fillText(varName, margin.left + plotW / 2, H - 8);
+
+            ctx2d.save();
+            ctx2d.translate(14, margin.top + plotH / 2);
+            ctx2d.rotate(-Math.PI / 2);
+            ctx2d.textAlign = 'center';
+            ctx2d.fillText('Frequency', 0, 0);
+            ctx2d.restore();
+
+            // Tooltip
+            if (hoveredIdx !== null && hoveredIdx !== undefined) {
+                const bin = bins[hoveredIdx];
+                const pct = ((bin.count / n) * 100).toFixed(1);
+                const label = `${bin.count} (${pct}%)`;
+                const barX = margin.left + hoveredIdx * barW + barW / 2;
+                const barTopY = margin.top + plotH - (maxCount > 0 ? (bin.count / maxCount) * plotH : 0);
+
+                ctx2d.font = '12px Montserrat, sans-serif';
+                const tw = ctx2d.measureText(label).width;
+                const tx = Math.min(Math.max(barX - tw / 2 - 6, margin.left), margin.left + plotW - tw - 12);
+                const ty = Math.max(barTopY - 26, margin.top);
+
+                ctx2d.fillStyle = '#333';
+                ctx2d.beginPath();
+                ctx2d.roundRect(tx, ty, tw + 12, 20, 4);
+                ctx2d.fill();
+
+                ctx2d.fillStyle = '#ffffff';
+                ctx2d.textAlign = 'left';
+                ctx2d.fillText(label, tx + 6, ty + 14);
+            }
+        }
+
+        drawHistogram(null);
+
+        canvas._hoverHandler && canvas.removeEventListener('mousemove', canvas._hoverHandler);
+        canvas._leaveHandler && canvas.removeEventListener('mouseleave', canvas._leaveHandler);
+
+        const barW = plotW / binCount;
+        canvas._hoverHandler = function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+
+            let hoveredIdx = null;
+            if (mx >= margin.left && mx <= margin.left + plotW && my >= margin.top && my <= margin.top + plotH) {
+                const idx = Math.floor((mx - margin.left) / barW);
+                const bin = bins[idx];
+                if (bin) {
+                    const barH = maxCount > 0 ? (bin.count / maxCount) * plotH : 0;
+                    const barTopY = margin.top + plotH - barH;
+                    if (my >= barTopY) hoveredIdx = idx;
                 }
             }
-        });
+            drawHistogram(hoveredIdx);
+            canvas.style.cursor = hoveredIdx !== null ? 'pointer' : 'default';
+        };
 
-        // Show frequency table
+        canvas._leaveHandler = function() {
+            drawHistogram(null);
+            canvas.style.cursor = 'default';
+        };
+
+        canvas.addEventListener('mousemove', canvas._hoverHandler);
+        canvas.addEventListener('mouseleave', canvas._leaveHandler);
+
+        // Frequency table
         const statsTbody = document.getElementById('quan-os-stats-tbody');
         statsTbody.innerHTML = '';
         bins.forEach(bin => {
@@ -873,7 +983,7 @@ function generateQuanOS() {
                 <td>${pct}%</td>
             </tr>`;
         });
-
+        
     } else if (chartType === 'dotplot') {
 
         const freqCounts = {};
@@ -1054,89 +1164,124 @@ function generateQuanOS() {
         const q1 = calcQuartile(sorted, 0.25);
         const median = calcMedian(sorted);
         const q3 = calcQuartile(sorted, 0.75);
+        const iqr = q3 - q1;
         const min = sorted[0];
         const max = sorted[sorted.length - 1];
 
-        quanOSChart = new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: [varName],
-                datasets: [
-                    // Lower whisker to Q1 (invisible filler)
-                    {
-                        label: 'Min to Q1',
-                        data: [[min, q1]],
-                        backgroundColor: 'transparent',
-                        borderColor: barColor,
-                        borderWidth: 2,
-                        borderSkipped: false,
-                    },
-                    // Q1 to Median (box lower half)
-                    {
-                        label: 'Q1 to Median',
-                        data: [[q1, median]],
-                        backgroundColor: barColor + '88',
-                        borderColor: barColor,
-                        borderWidth: 2,
-                        borderSkipped: false,
-                    },
-                    // Median to Q3 (box upper half)
-                    {
-                        label: 'Median to Q3',
-                        data: [[median, q3]],
-                        backgroundColor: barColor + '44',
-                        borderColor: barColor,
-                        borderWidth: 2,
-                        borderSkipped: false,
-                    },
-                    // Q3 to Max (invisible filler)
-                    {
-                        label: 'Q3 to Max',
-                        data: [[q3, max]],
-                        backgroundColor: 'transparent',
-                        borderColor: barColor,
-                        borderWidth: 2,
-                        borderSkipped: false,
-                    }
-                ]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => {
-                                const labels = ['Min–Q1', 'Q1–Median', 'Median–Q3', 'Q3–Max'];
-                                return labels[ctx.datasetIndex];
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        title: { display: true, text: varName, color: '#AAAAAA' },
-                        ticks: { color: '#AAAAAA' },
-                        grid: { color: '#2E2E2E' }
-                    },
-                    y: {
-                        ticks: { color: '#AAAAAA' },
-                        grid: { color: '#2E2E2E' }
-                    }
-                }
-            }
+        const lowerFence = q1 - 1.5 * iqr;
+        const upperFence = q3 + 1.5 * iqr;
+        const outliers = sorted.filter(v => v < lowerFence || v > upperFence);
+        const whiskerLow = sorted.find(v => v >= lowerFence) ?? min;
+        const whiskerHigh = [...sorted].reverse().find(v => v <= upperFence) ?? max;
+
+        const margin = { top: 40, right: 40, bottom: 50, left: 40 };
+        const parent = canvas.parentElement;
+        const W = parent.clientWidth - 40;
+        const H = 200;
+
+        canvas.width = W;
+        canvas.height = H;
+        canvas.style.display = 'block';
+        canvas.style.height = 'auto';
+
+        const ctx2d = canvas.getContext('2d');
+        const plotW = W - margin.left - margin.right;
+        const midY = margin.top + (H - margin.top - margin.bottom) / 2;
+        const boxH = 50;
+
+        const bg = document.getElementById('quan-os-bg').value;
+        const axisColor = document.getElementById('quan-os-axis-color').value;
+        const gridColor = document.getElementById('quan-os-grid-color').value;
+
+        const toX = v => margin.left + ((v - min) / (max - min || 1)) * plotW;
+
+        ctx2d.fillStyle = bg;
+        ctx2d.fillRect(0, 0, W, H);
+
+        const tickCount = 8;
+        ctx2d.strokeStyle = gridColor;
+        ctx2d.lineWidth = 1;
+        for (let i = 0; i <= tickCount; i++) {
+            const v = min + (i / tickCount) * (max - min);
+            const x = toX(v);
+            ctx2d.beginPath();
+            ctx2d.moveTo(x, margin.top);
+            ctx2d.lineTo(x, H - margin.bottom);
+            ctx2d.stroke();
+        }
+
+        ctx2d.strokeStyle = axisColor;
+        ctx2d.lineWidth = 1;
+        ctx2d.beginPath();
+        ctx2d.moveTo(margin.left, H - margin.bottom);
+        ctx2d.lineTo(margin.left + plotW, H - margin.bottom);
+        ctx2d.stroke();
+
+        ctx2d.fillStyle = axisColor;
+        ctx2d.font = '11px Montserrat, sans-serif';
+        ctx2d.textAlign = 'center';
+        for (let i = 0; i <= tickCount; i++) {
+            const v = min + (i / tickCount) * (max - min);
+            const x = toX(v);
+            ctx2d.beginPath();
+            ctx2d.moveTo(x, H - margin.bottom);
+            ctx2d.lineTo(x, H - margin.bottom + 5);
+            ctx2d.strokeStyle = axisColor;
+            ctx2d.stroke();
+            ctx2d.fillText(v.toFixed(1), x, H - margin.bottom + 18);
+        }
+
+        ctx2d.fillStyle = axisColor;
+        ctx2d.font = '12px Montserrat, sans-serif';
+        ctx2d.fillText(varName, margin.left + plotW / 2, H - 4);
+
+        ctx2d.strokeStyle = barColor;
+        ctx2d.lineWidth = 2;
+        ctx2d.beginPath();
+        ctx2d.moveTo(toX(whiskerLow), midY);
+        ctx2d.lineTo(toX(q1), midY);
+        ctx2d.stroke();
+
+        ctx2d.beginPath();
+        ctx2d.moveTo(toX(q3), midY);
+        ctx2d.lineTo(toX(whiskerHigh), midY);
+        ctx2d.stroke();
+
+        const capH = boxH * 0.4;
+        [whiskerLow, whiskerHigh].forEach(v => {
+            ctx2d.beginPath();
+            ctx2d.moveTo(toX(v), midY - capH / 2);
+            ctx2d.lineTo(toX(v), midY + capH / 2);
+            ctx2d.stroke();
+        });
+
+        ctx2d.fillStyle = barColor + '44';
+        ctx2d.strokeStyle = barColor;
+        ctx2d.lineWidth = 2;
+        ctx2d.fillRect(toX(q1), midY - boxH / 2, toX(q3) - toX(q1), boxH);
+        ctx2d.strokeRect(toX(q1), midY - boxH / 2, toX(q3) - toX(q1), boxH);
+
+        ctx2d.strokeStyle = barColor;
+        ctx2d.lineWidth = 3;
+        ctx2d.beginPath();
+        ctx2d.moveTo(toX(median), midY - boxH / 2);
+        ctx2d.lineTo(toX(median), midY + boxH / 2);
+        ctx2d.stroke();
+
+        outliers.forEach(v => {
+            ctx2d.beginPath();
+            ctx2d.arc(toX(v), midY, 5, 0, Math.PI * 2);
+            ctx2d.fillStyle = barColor;
+            ctx2d.fill();
         });
 
         document.getElementById('quan-os-stats-tbody').innerHTML = '';
 
     } else if (chartType === 'stemplot') {
 
-        // Stem plot is text-based
         canvas.style.display = 'none';
         canvas.previousElementSibling.style.display = 'none';
 
-        // Build stem and leaf
         const stemMap = {};
         sorted.forEach(v => {
             const stem = Math.floor(v / 10);
@@ -1154,7 +1299,6 @@ function generateQuanOS() {
         });
         html += `</table></div>`;
 
-        // Display into output panel
         const outputPanel = canvas.parentElement;
         let stemDiv = outputPanel.querySelector('.stemplot');
         if (stemDiv) stemDiv.remove();
@@ -1163,7 +1307,6 @@ function generateQuanOS() {
         document.getElementById('quan-os-stats-tbody').innerHTML = '';
     }
 
-    // Calculate and display summary stats
     const min = sorted[0];
     const max = sorted[sorted.length - 1];
     const mean = values.reduce((a, b) => a + b, 0) / n;
@@ -1171,14 +1314,12 @@ function generateQuanOS() {
     const q1 = calcQuartile(sorted, 0.25);
     const q3 = calcQuartile(sorted, 0.75);
 
-    // Mode
     const counts = {};
     values.forEach(v => counts[v] = (counts[v] || 0) + 1);
     const maxCount = Math.max(...Object.values(counts));
     const modes = Object.keys(counts).filter(k => counts[k] === maxCount).map(Number);
     const modeStr = maxCount === 1 ? 'None' : modes.join(', ');
 
-    // Sample standard deviation
     const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (n - 1);
     const sd = Math.sqrt(variance);
 
@@ -1194,7 +1335,6 @@ function generateQuanOS() {
     document.getElementById('quan-os-mode').textContent = modeStr;
     document.getElementById('quan-os-sd').textContent = sd.toFixed(2);
 
-    // Show stats, hide placeholder
     document.getElementById('quan-os-stats').style.display = 'block';
     document.querySelector('#quan-os-stats').previousElementSibling.style.display = 'none';
 }
@@ -1221,81 +1361,34 @@ function calcQuartile(sorted, q) {
 
 function updateQuanOSAppearance() {
     const chartType = document.getElementById('quan-os-charttype').value;
-    if (chartType === 'dotplot') {
+    if (chartType === 'dotplot' || chartType === 'histogram' || chartType === 'boxplot') {
         generateQuanOS();
-        return;
     }
-    
-    if (!quanOSChart) return;
-
-    const bg = document.getElementById('quan-os-bg').value;
-    const axisColor = document.getElementById('quan-os-axis-color').value;
-    const titleColor = document.getElementById('quan-os-title-color').value;
-    const gridColor = document.getElementById('quan-os-grid-color').value;
-    const barColor = document.getElementById('quan-os-bar-color').value;
-
-    quanOSChart.config.options.plugins.customCanvasBackgroundColor = { color: bg };
-
-    if (quanOSChart.config.options.scales) {
-        const scales = quanOSChart.config.options.scales;
-        if (scales.x) {
-            scales.x.ticks.color = axisColor;
-            scales.x.grid.color = gridColor;
-            if (scales.x.title) scales.x.title.color = titleColor;
-        }
-        if (scales.y) {
-            scales.y.ticks.color = axisColor;
-            scales.y.grid.color = gridColor;
-            if (scales.y.title) scales.y.title.color = titleColor;
-        }
-    }
-
-    if (quanOSChart.config.options.plugins.legend) {
-        quanOSChart.config.options.plugins.legend.labels.color = axisColor;
-    }
-
-    // Update bar color live
-    quanOSChart.data.datasets.forEach(ds => {
-        if (ds.backgroundColor !== 'transparent') {
-            ds.backgroundColor = barColor;
-            ds.borderColor = barColor;
-        }
-    });
-
-    quanOSChart.update();
 }
 
 // Export
 
 function downloadQuanOS() {
-    const canvas = document.getElementById('quan-os-chart');
     const chartType = document.getElementById('quan-os-charttype').value;
-    if (chartType === 'dotplot') {
-        const link = document.createElement('a');
-        link.download = 'chart.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+    if (chartType === 'stemplot') {
+        alert('Stem plots are text-based and can\'t be downloaded as an image.');
         return;
     }
-    if (!quanOSChart) return;
+    const canvas = document.getElementById('quan-os-chart');
     const link = document.createElement('a');
     link.download = 'chart.png';
-    link.href = quanOSChart.toBase64Image();
+    link.href = canvas.toDataURL('image/png');
     link.click();
 }
 
 async function copyQuanOS() {
     const chartType = document.getElementById('quan-os-charttype').value;
-    const canvas = document.getElementById('quan-os-chart');
-    if (chartType === 'dotplot') {
-        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        alert('Chart copied to clipboard!');
+    if (chartType === 'stemplot') {
+        alert('Stem plots are text-based and can\'t be copied as an image.');
         return;
     }
-    if (!quanOSChart) return;
-    const dataUrl = quanOSChart.toBase64Image();
-    const blob = await (await fetch(dataUrl)).blob();
+    const canvas = document.getElementById('quan-os-chart');
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
     alert('Chart copied to clipboard!');
 }
@@ -1329,4 +1422,568 @@ function calculateQuanOSReverse() {
     result.textContent = `The ${input}th percentile is ${value.toFixed(2)}.`;
 }
 
-// Hi (Rahi) or reader. I am aware that there is a lack of commentation but that is because I followed tutorials and became lazy. This is a self-reminder to add comments & update!
+//One Variable Multiple Groups Quantitative
+let quanOMChart = null;
+
+function addQuanOMGroup() {
+    const container = document.getElementById('quan-om-groups');
+    const count = container.querySelectorAll('.quan-om-group').length + 1;
+    const color = randomGroupColor();
+
+    const div = document.createElement('div');
+    div.className = 'quan-om-group';
+    div.style.marginTop = '10px';
+    div.innerHTML = `
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+            <input type="text" class="table-input" placeholder="Group ${count}" value="Group ${count}" style="flex:1;">
+            <input type="color" class="color-input" value="${color}">
+            <button class="remove-row-button" onclick="removeGroupQuanOM(this)">X</button>
+        </div>
+        <textarea class="input-field quan-om-data" placeholder="e.g. 1, 1, 3, 5, 8" style="min-height:50px;"></textarea>
+    `;
+    container.appendChild(div);
+}
+
+function removeGroupQuanOM(btn) {
+    const container = document.getElementById('quan-om-groups');
+    const groups = container.querySelectorAll('.quan-om-group');
+    if (groups.length <= 1) return;
+    btn.closest('.quan-om-group').remove();
+}
+
+function randomGroupColor() {
+    const hue = Math.floor(Math.random() * 360);
+    const sat = 55 + Math.floor(Math.random() * 25);
+    const light = 50 + Math.floor(Math.random() * 15);
+    return hslToHex(hue, sat, light);
+}
+
+function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const k = n => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    const toHex = x => Math.round(255 * x).toString(16).padStart(2, '0');
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+
+function readQuanOMGroups() {
+    const groupDivs = document.querySelectorAll('.quan-om-group');
+    const groups = [];
+
+    groupDivs.forEach(div => {
+        const nameInput = div.querySelector('input[type="text"]');
+        const colorInput = div.querySelector('input[type="color"]');
+        const textarea = div.querySelector('.quan-om-data');
+
+        const name = nameInput.value.trim() || 'Group';
+        const color = colorInput.value;
+        const values = textarea.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+
+        if (values.length > 0) {
+            const sorted = [...values].sort((a, b) => a - b);
+            groups.push({ name, color, values, sorted });
+        }
+    });
+
+    return groups;
+}
+
+function generateQuanOM() {
+    const groups = readQuanOMGroups();
+    if (groups.length === 0) return;
+
+    const varName = document.getElementById('quan-om-varname').value.trim() || 'Variable';
+    const chartType = document.getElementById('quan-om-charttype').value;
+
+    const canvas = document.getElementById('quan-om-chart');
+    canvas.style.height = '';
+    canvas.style.width = '';
+    canvas.removeAttribute('width');
+    canvas.removeAttribute('height');
+    canvas.style.display = 'block';
+    canvas.previousElementSibling.style.display = 'none';
+
+    if (canvas._hoverHandler) { canvas.removeEventListener('mousemove', canvas._hoverHandler); canvas._hoverHandler = null; }
+    if (canvas._leaveHandler) { canvas.removeEventListener('mouseleave', canvas._leaveHandler); canvas._leaveHandler = null; }
+    canvas.style.cursor = 'default';
+
+    const bg = document.getElementById('quan-om-bg').value;
+    const axisColor = document.getElementById('quan-om-axis-color').value;
+    const titleColor = document.getElementById('quan-om-title-color').value;
+    const gridColor = document.getElementById('quan-om-grid-color').value;
+
+    const allValues = groups.flatMap(g => g.values);
+    const globalMin = Math.min(...allValues);
+    const globalMax = Math.max(...allValues);
+
+    if (chartType === 'boxplot') {
+        drawQuanOMBoxplots(canvas, groups, varName, globalMin, globalMax, bg, axisColor, titleColor, gridColor);
+    } else if (chartType === 'histogram') {
+        drawQuanOMHistograms(canvas, groups, varName, globalMin, globalMax, bg, axisColor, titleColor, gridColor);
+    } else if (chartType === 'dotplot') {
+        drawQuanOMDotplots(canvas, groups, varName, globalMin, globalMax, bg, axisColor, titleColor, gridColor);
+    }
+
+    const statsTbody = document.getElementById('quan-om-stats-tbody');
+    statsTbody.innerHTML = '';
+    groups.forEach(g => {
+        const n = g.values.length;
+        const mean = g.values.reduce((a, b) => a + b, 0) / n;
+        const median = calcMedian(g.sorted);
+        const q1 = calcQuartile(g.sorted, 0.25);
+        const q3 = calcQuartile(g.sorted, 0.75);
+        const min = g.sorted[0];
+        const max = g.sorted[g.sorted.length - 1];
+        const variance = n > 1 ? g.values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (n - 1) : 0;
+        const sd = Math.sqrt(variance);
+
+        statsTbody.innerHTML += `<tr>
+            <td><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${g.color}; margin-right:6px;"></span>${g.name}</td>
+            <td>${n}</td>
+            <td>${min.toFixed(2)}</td>
+            <td>${q1.toFixed(2)}</td>
+            <td>${median.toFixed(2)}</td>
+            <td>${q3.toFixed(2)}</td>
+            <td>${max.toFixed(2)}</td>
+            <td>${mean.toFixed(2)}</td>
+            <td>${sd.toFixed(2)}</td>
+        </tr>`;
+    });
+
+    document.getElementById('quan-om-stats').style.display = 'block';
+    document.querySelector('#quan-om-stats').previousElementSibling.style.display = 'none';
+}
+
+function drawQuanOMBoxplots(canvas, groups, varName, globalMin, globalMax, bg, axisColor, titleColor, gridColor) {
+    const margin = { top: 20, right: 40, bottom: 50, left: 120 };
+    const laneH = 60;
+    const parent = canvas.parentElement;
+    const W = parent.clientWidth - 40;
+    const H = margin.top + margin.bottom + groups.length * laneH;
+
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = 'auto';
+
+    const ctx = canvas.getContext('2d');
+    const plotW = W - margin.left - margin.right;
+    const range = (globalMax - globalMin) || 1;
+    const toX = v => margin.left + ((v - globalMin) / range) * plotW;
+
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    const tickCount = 8;
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= tickCount; i++) {
+        const v = globalMin + (i / tickCount) * range;
+        const x = toX(v);
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, H - margin.bottom);
+        ctx.stroke();
+    }
+
+    ctx.strokeStyle = axisColor;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, H - margin.bottom);
+    ctx.lineTo(margin.left + plotW, H - margin.bottom);
+    ctx.stroke();
+
+    ctx.fillStyle = axisColor;
+    ctx.font = '11px Montserrat, sans-serif';
+    ctx.textAlign = 'center';
+    for (let i = 0; i <= tickCount; i++) {
+        const v = globalMin + (i / tickCount) * range;
+        const x = toX(v);
+        ctx.beginPath();
+        ctx.moveTo(x, H - margin.bottom);
+        ctx.lineTo(x, H - margin.bottom + 5);
+        ctx.stroke();
+        ctx.fillText(v.toFixed(1), x, H - margin.bottom + 18);
+    }
+
+    ctx.fillStyle = titleColor;
+    ctx.font = '12px Montserrat, sans-serif';
+    ctx.fillText(varName, margin.left + plotW / 2, H - 8);
+
+    groups.forEach((g, i) => {
+        const sorted = g.sorted;
+        const q1 = calcQuartile(sorted, 0.25);
+        const median = calcMedian(sorted);
+        const q3 = calcQuartile(sorted, 0.75);
+        const iqr = q3 - q1;
+        const min = sorted[0];
+        const max = sorted[sorted.length - 1];
+        const lowerFence = q1 - 1.5 * iqr;
+        const upperFence = q3 + 1.5 * iqr;
+        const outliers = sorted.filter(v => v < lowerFence || v > upperFence);
+        const whiskerLow = sorted.find(v => v >= lowerFence) ?? min;
+        const whiskerHigh = [...sorted].reverse().find(v => v <= upperFence) ?? max;
+
+        const midY = margin.top + i * laneH + laneH / 2;
+        const boxH = laneH * 0.5;
+
+        ctx.fillStyle = axisColor;
+        ctx.font = '12px Montserrat, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(g.name, margin.left - 12, midY + 4);
+
+        ctx.strokeStyle = g.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(toX(whiskerLow), midY);
+        ctx.lineTo(toX(q1), midY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX(q3), midY);
+        ctx.lineTo(toX(whiskerHigh), midY);
+        ctx.stroke();
+
+        const capH = boxH * 0.4;
+        [whiskerLow, whiskerHigh].forEach(v => {
+            ctx.beginPath();
+            ctx.moveTo(toX(v), midY - capH / 2);
+            ctx.lineTo(toX(v), midY + capH / 2);
+            ctx.stroke();
+        });
+
+        ctx.fillStyle = g.color + '44';
+        ctx.strokeStyle = g.color;
+        ctx.fillRect(toX(q1), midY - boxH / 2, toX(q3) - toX(q1), boxH);
+        ctx.strokeRect(toX(q1), midY - boxH / 2, toX(q3) - toX(q1), boxH);
+
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(toX(median), midY - boxH / 2);
+        ctx.lineTo(toX(median), midY + boxH / 2);
+        ctx.stroke();
+
+        outliers.forEach(v => {
+            ctx.beginPath();
+            ctx.arc(toX(v), midY, 4, 0, Math.PI * 2);
+            ctx.fillStyle = g.color;
+            ctx.fill();
+        });
+    });
+}
+
+function drawQuanOMHistograms(canvas, groups, varName, globalMin, globalMax, bg, axisColor, titleColor, gridColor) {
+    const binCount = Math.ceil(Math.log2(Math.max(...groups.map(g => g.values.length))) + 1);
+    const binWidth = (globalMax - globalMin) / binCount || 1;
+
+    const bins = Array.from({ length: binCount }, (_, i) => ({
+        start: globalMin + i * binWidth,
+        end: globalMin + (i + 1) * binWidth,
+        counts: groups.map(() => 0)
+    }));
+
+    groups.forEach((g, gi) => {
+        g.values.forEach(v => {
+            const idx = Math.min(Math.floor((v - globalMin) / binWidth), binCount - 1);
+            bins[idx].counts[gi]++;
+        });
+    });
+
+    const maxCount = Math.max(...bins.flatMap(b => b.counts));
+    const totalN = groups.reduce((sum, g) => sum + g.values.length, 0);
+
+    const margin = { top: 30, right: 30, bottom: 60, left: 50 };
+    const parent = canvas.parentElement;
+    const W = parent.clientWidth - 40;
+    const H = 360;
+
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = 'auto';
+
+    const ctx = canvas.getContext('2d');
+    const plotW = W - margin.left - margin.right;
+    const plotH = H - margin.top - margin.bottom;
+    const binSlotW = plotW / binCount;
+    const barGap = 1;
+    const barW = (binSlotW - barGap * 2) / groups.length;
+
+    const barRects = [];
+    bins.forEach((bin, bi) => {
+        groups.forEach((g, gi) => {
+            const count = bin.counts[gi];
+            const x = margin.left + bi * binSlotW + barGap + gi * barW;
+            barRects.push({ bi, gi, x, w: barW - 1, count, groupName: g.name, color: g.color });
+        });
+    });
+
+    function draw(hovered) {
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        const yTicks = 5;
+        ctx.strokeStyle = gridColor;
+        ctx.fillStyle = axisColor;
+        ctx.font = '11px Montserrat, sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= yTicks; i++) {
+            const v = (maxCount / yTicks) * i;
+            const y = margin.top + plotH - (v / maxCount) * plotH;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, y);
+            ctx.lineTo(margin.left + plotW, y);
+            ctx.stroke();
+            ctx.fillText(Math.round(v), margin.left - 8, y + 4);
+        }
+
+        barRects.forEach((bar, idx) => {
+            const barH = maxCount > 0 ? (bar.count / maxCount) * plotH : 0;
+            const y = margin.top + plotH - barH;
+            ctx.fillStyle = idx === hovered ? '#ffffff' : bar.color;
+            ctx.fillRect(bar.x, y, bar.w, barH);
+        });
+
+        ctx.strokeStyle = axisColor;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top + plotH);
+        ctx.lineTo(margin.left + plotW, margin.top + plotH);
+        ctx.stroke();
+
+        ctx.fillStyle = axisColor;
+        ctx.textAlign = 'center';
+        bins.forEach((bin, i) => {
+            const x = margin.left + i * binSlotW;
+            ctx.fillText(bin.start.toFixed(1), x, margin.top + plotH + 16);
+        });
+        ctx.fillText(bins[bins.length - 1].end.toFixed(1), margin.left + plotW, margin.top + plotH + 16);
+
+        ctx.fillStyle = titleColor;
+        ctx.font = '12px Montserrat, sans-serif';
+        ctx.fillText(varName, margin.left + plotW / 2, H - 28);
+
+        let legendX = margin.left;
+        const legendY = 14;
+        ctx.font = '11px Montserrat, sans-serif';
+        groups.forEach(g => {
+            ctx.fillStyle = g.color;
+            ctx.fillRect(legendX, legendY - 8, 10, 10);
+            ctx.fillStyle = axisColor;
+            ctx.textAlign = 'left';
+            ctx.fillText(g.name, legendX + 14, legendY + 1);
+            legendX += ctx.measureText(g.name).width + 36;
+        });
+
+        if (hovered !== null && hovered !== undefined) {
+            const bar = barRects[hovered];
+            const barH = maxCount > 0 ? (bar.count / maxCount) * plotH : 0;
+            const barTopY = margin.top + plotH - barH;
+            const pct = totalN > 0 ? ((bar.count / totalN) * 100).toFixed(1) : '0.0';
+            const label = `${bar.groupName}: ${bar.count} (${pct}%)`;
+
+            ctx.font = '12px Montserrat, sans-serif';
+            const tw = ctx.measureText(label).width;
+            const tx = Math.min(Math.max(bar.x + bar.w / 2 - tw / 2 - 6, margin.left), margin.left + plotW - tw - 12);
+            const ty = Math.max(barTopY - 26, margin.top);
+
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.roundRect(tx, ty, tw + 12, 20, 4);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            ctx.fillText(label, tx + 6, ty + 14);
+        }
+    }
+
+    draw(null);
+
+    canvas._hoverHandler = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mx = (e.clientX - rect.left) * scaleX;
+        const my = (e.clientY - rect.top) * scaleY;
+
+        let hoveredIdx = null;
+        barRects.forEach((bar, idx) => {
+            const barH = maxCount > 0 ? (bar.count / maxCount) * plotH : 0;
+            const barTopY = margin.top + plotH - barH;
+            if (mx >= bar.x && mx <= bar.x + bar.w && my >= barTopY && my <= margin.top + plotH) {
+                hoveredIdx = idx;
+            }
+        });
+        draw(hoveredIdx);
+        canvas.style.cursor = hoveredIdx !== null ? 'pointer' : 'default';
+    };
+
+    canvas._leaveHandler = function() {
+        draw(null);
+        canvas.style.cursor = 'default';
+    };
+
+    canvas.addEventListener('mousemove', canvas._hoverHandler);
+    canvas.addEventListener('mouseleave', canvas._leaveHandler);
+}
+
+function drawQuanOMDotplots(canvas, groups, varName, globalMin, globalMax, bg, axisColor, titleColor, gridColor) {
+    const dotRadius = 5;
+    const dotPadding = dotRadius * 2 + 2;
+
+    const groupInfo = groups.map(g => {
+        const freqCounts = {};
+        g.values.forEach(v => freqCounts[v] = (freqCounts[v] || 0) + 1);
+        const maxStack = Math.max(...Object.values(freqCounts));
+        return { ...g, freqCounts, maxStack };
+    });
+
+    const margin = { top: 20, right: 30, bottom: 50, left: 120 };
+    const laneGap = 16;
+    const laneHeights = groupInfo.map(g => g.maxStack * dotPadding + dotRadius * 2);
+    const totalLaneH = laneHeights.reduce((a, b) => a + b + laneGap, 0);
+
+    const parent = canvas.parentElement;
+    const W = parent.clientWidth - 40;
+    const H = margin.top + margin.bottom + totalLaneH;
+
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = 'auto';
+
+    const ctx = canvas.getContext('2d');
+    const plotW = W - margin.left - margin.right;
+    const range = (globalMax - globalMin) || 1;
+    const toX = v => margin.left + ((v - globalMin) / range) * plotW;
+
+    let currentY = margin.top;
+    const laneData = [];
+    const dotPositions = [];
+
+    groupInfo.forEach(g => {
+        const laneH = g.maxStack * dotPadding + dotRadius * 2;
+        const baseY = currentY + laneH - dotRadius;
+        laneData.push({ ...g, baseY, laneTop: currentY });
+
+        Object.keys(g.freqCounts).map(Number).sort((a, b) => a - b).forEach(v => {
+            const x = toX(v);
+            for (let i = 0; i < g.freqCounts[v]; i++) {
+                const y = baseY - dotRadius - (i * dotPadding);
+                dotPositions.push({ x, y, value: v, groupName: g.name, color: g.color });
+            }
+        });
+
+        currentY += laneH + laneGap;
+    });
+
+    const axisY = currentY - laneGap + 10;
+
+    function draw(hoveredDot) {
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        laneData.forEach(g => {
+            ctx.strokeStyle = gridColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, g.baseY);
+            ctx.lineTo(margin.left + plotW, g.baseY);
+            ctx.stroke();
+
+            ctx.fillStyle = axisColor;
+            ctx.font = '12px Montserrat, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(g.name, margin.left - 12, g.baseY + 4);
+        });
+
+        dotPositions.forEach(dot => {
+            const isHovered = hoveredDot &&
+                Math.abs(dot.x - hoveredDot.x) < 1 &&
+                Math.abs(dot.y - hoveredDot.y) < 1;
+            ctx.beginPath();
+            ctx.arc(dot.x, dot.y, isHovered ? dotRadius * 1.4 : dotRadius, 0, Math.PI * 2);
+            ctx.fillStyle = isHovered ? '#ffffff' : dot.color;
+            ctx.fill();
+        });
+
+        ctx.strokeStyle = axisColor;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, axisY);
+        ctx.lineTo(margin.left + plotW, axisY);
+        ctx.stroke();
+
+        const tickCount = 8;
+        ctx.fillStyle = axisColor;
+        ctx.font = '11px Montserrat, sans-serif';
+        ctx.textAlign = 'center';
+        for (let i = 0; i <= tickCount; i++) {
+            const v = globalMin + (i / tickCount) * range;
+            const x = toX(v);
+            ctx.beginPath();
+            ctx.moveTo(x, axisY);
+            ctx.lineTo(x, axisY + 5);
+            ctx.stroke();
+            ctx.fillText(v.toFixed(1), x, axisY + 18);
+        }
+
+        ctx.fillStyle = titleColor;
+        ctx.font = '12px Montserrat, sans-serif';
+        ctx.fillText(varName, margin.left + plotW / 2, H - 8);
+
+        if (hoveredDot) {
+            const label = `${hoveredDot.groupName}: ${hoveredDot.value}`;
+            ctx.font = '12px Montserrat, sans-serif';
+            const tw = ctx.measureText(label).width;
+            const tx = Math.min(Math.max(hoveredDot.x - tw / 2 - 6, margin.left), W - tw - 20);
+            const ty = hoveredDot.y - dotRadius - 18;
+
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.roundRect(tx, ty, tw + 12, 20, 4);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            ctx.fillText(label, tx + 6, ty + 14);
+        }
+    }
+
+    draw(null);
+
+    canvas._hoverHandler = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mx = (e.clientX - rect.left) * scaleX;
+        const my = (e.clientY - rect.top) * scaleY;
+
+        const hovered = dotPositions.find(dot =>
+            Math.sqrt((dot.x - mx) ** 2 + (dot.y - my) ** 2) <= dotRadius + 3
+        );
+        draw(hovered || null);
+        canvas.style.cursor = hovered ? 'pointer' : 'default';
+    };
+
+    canvas._leaveHandler = function() {
+        draw(null);
+        canvas.style.cursor = 'default';
+    };
+
+    canvas.addEventListener('mousemove', canvas._hoverHandler);
+    canvas.addEventListener('mouseleave', canvas._leaveHandler);
+}
+
+// Export
+function downloadQuanOM() {
+    const canvas = document.getElementById('quan-om-chart');
+    const link = document.createElement('a');
+    link.download = 'chart.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+async function copyQuanOM() {
+    const canvas = document.getElementById('quan-om-chart');
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    alert('Chart copied to clipboard!');
+}

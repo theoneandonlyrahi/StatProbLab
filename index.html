@@ -495,7 +495,7 @@
 
                     <button class="add-row-button" onclick="addRowOM()">+ Row</button>
                     <button class="add-row-button" onclick="addGroupOM()">+ Group</button>
-                    <button class="add-row-button" onclick="removeGroupOM()">- Group</button>
+                    <button class="add-row-button" onclick="removeGroupOM(this)">- Group</button>
 
                     <label class="input-label">Chart Type</label>
                     <select class="input-select" id="cat-om-charttype">
@@ -781,6 +781,88 @@
             </div>
 
             <div class="page-divider"></div>
+
+            <div class="tool-container">
+                <div class="input-panel">
+
+                    <label class="input-label">Variable Name</label>
+                    <input id="quan-om-varname" type="text" class="input-field" placeholder="e.g. Test Scores">
+
+                    <label class="input-label">Groups</label>
+                    <div id="quan-om-groups">
+                        <div class="quan-om-group">
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom:6px;">
+                                <input type="text" class="table-input" placeholder="Group 1" value="Group 1" style="flex:1;">
+                                <input type="color" class="color-input" value="#5897cb">
+                                <button class="remove-row-button" onclick="removeGroupQuanOM(this)">X</button>
+                            </div>
+                            <textarea class="input-field quan-om-data" placeholder="e.g. 1, 1, 3, 5, 8" style="min-height: 50px"></textarea>
+                        </div>
+                    </div>
+
+                    <button class="add-row-button" onclick="addQuanOMGroup()">+ Group</button>
+
+                    <label class="input-label">Chart Type</label>
+                    <select class="input-select" id="quan-om-charttype">
+                        <option value="boxplot">Side-by-Side Box Plots</option>
+                        <option value="histogram">Grouped Histograms</option>
+                        <option value="dotplot">Side-by-Side Dot Plots</option>
+                    </select>
+
+                    <button class="generate-button" onclick="generateQuanOM()">Generate Chart</button>
+                </div>
+
+                <div class="output-panel">
+                    <p class="output-placeholder">Enter data and press generate to see the chart.</p>
+                    <canvas id="quan-om-chart" style="display: none;"></canvas>
+                </div>
+            </div>
+
+            <div class="bottom-container">
+                <div class="stats-panel">
+                    <p class="output-placeholder">Stats will appear here after generating the chart.</p>
+                    <div id="quan-om-stats" style="display:none;">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Group</th>
+                                    <th>n</th>
+                                    <th>Min</th>
+                                    <th>Q1</th>
+                                    <th>Median</th>
+                                    <th>Q3</th>
+                                    <th>Max</th>
+                                    <th>Mean</th>
+                                    <th>SD</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quan-om-stats-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="custom-panel">
+                    <p class="input-label">Export</p>
+                    <button class="custom-button" onclick="downloadQuanOM()">Download as PNG</button>
+                    <button class="custom-button" onclick="copyQuanOM()">Copy to Clipboard</button>
+
+                    <div class="page-divider"></div>
+
+                    <p class="input-label">Chart Appearance</p>
+
+                    <label class="input-label">Chart Background</label>
+                    <input type="color" class="color-input" id="quan-om-bg" value="#242424" oninput="generateQuanOM()">
+
+                    <label class="input-label">Axis Label Color</label>
+                    <input type="color" class="color-input" id="quan-om-axis-color" value="#aaaaaa" oninput="generateQuanOM()">
+
+                    <label class="inputLabel">Title Color</label>
+                    <input type="color" class="color-input" id="quan-om-title-color" value="#ffffff" oninput="generateQuanOM()">
+
+                    <label class="input-label">Gridline Color</label>
+                    <input type="color" class="color-input" id="quan-om-grid-color" value="#2e2e2e" oninput="generateQuanOM()">
+                </div>
+            </div>
 
 
         </div>
