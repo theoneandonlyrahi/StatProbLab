@@ -1987,3 +1987,409 @@ async function copyQuanOM() {
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
     alert('Chart copied to clipboard!');
 }
+
+// Two Variable Quantitative
+function fitLinear(xs, ys) {
+    const n = xs.length;
+    const sumX = xs.reduce((a, b) => a + b, 0);
+    const sumY = ys.reduce((a, b) => a + b, 0);
+    const sumXY = xs.reduce((s, x, i) => s + x * ys[i], 0);
+    const sumX2 = xs.reduce((s, x) => s + x * x, 0);
+    const b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const a = (sumY - b * sumX) / n;
+    return {
+        predict: x => a + b * x,
+        equation: `y = ${a.toFixed(3)} + ${b.toFixed(3)}x`
+    };
+}
+
+function fitQuadratic(xs, ys) {
+    const n = xs.length;
+    let Sx = 0, Sx2 = 0, Sx3 = 0, Sx4 = 0, Sy = 0, Sxy = 0, Sx2y = 0;
+    for (let i = 0; i < n; i++) {
+        const x = xs[i], y = ys[i];
+        Sx += x; Sx2 += x*x; Sx3 += x*x*x; Sx4 += x*x*x*x;
+        Sy += y; Sxy += x*y; Sx2y += x*x*y;
+    }
+    const A = [[n, Sx, Sx2], [Sx, Sx2, Sx3], [Sx2, Sx3, Sx4]];
+    const B = [Sy, Sxy, Sx2y];
+    const [a, b, c] = solve3x3(A, B);
+    return {
+        predict: x => a + b * x + c * x * x,
+        equation: `y = ${a.toFixed(3)} + ${b.toFixed(3)}x + ${c.toFixed(3)}x²`
+    };
+}
+
+function solve3x3(A, B) {
+    const det = m => m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])
+                    - m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])
+                    + m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0]);
+    const D = det(A);
+    const replaceCol = (m, col, vec) => m.map((row, i) => row.map((v, j) => j === col ? vec[i] : v));
+    const Da = det(replaceCol(A, 0, B));
+    const Db = det(replaceCol(A, 1, B));
+    const Dc = det(replaceCol(A, 2, B));
+    return [Da / D, Db / D, Dc / D];
+}
+
+function fitExponential(xs, ys) {
+    const lnY = ys.map(Math.log);
+    const { predict: linPredict } = fitLinear(xs, lnY);
+    const lnA = linPredict(0);
+    const a = Math.exp(lnA);
+    const b = linPredict(1) - lnA;
+    return {
+        predict: x => a * Math.exp(b * x),
+        equation: `y = ${a.toFixed(3)}*e^(${b.toFixed(3)}x)`
+    };
+}
+
+let quanTV2Model = null;
+let quanTV2Data = null;
+
+function generateQuanTV2() {
+    const xRaw = document.getElementById('quan-tv-xdata').value;
+    const yRaw = document.getElementById('quan-tv-ydata').value;
+    const xName = document.getElementById('quan-tv-xname').value.trim() || 'X';
+    const yName = document.getElementById('quan-tv-yname').value.trim() || 'Y';
+    const modelType = document.getElementById('quan-tv-model').value;
+    const chartType = document.getElementById('quan-tv-charttype').value;
+
+    const xs = xRaw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+    const ys = yRaw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+    const n = Math.min(xs.length, ys.length);
+    if (n < 2) return;
+
+    const xsT = xs.slice(0, n);
+    const ysT = ys.slice(0, n);
+
+    let model;
+    try {
+        if (modelType === 'linear') model = fitLinear(xsT, ysT);
+        else if (modelType === 'quadratic') model = fitQuadratic(xsT, ysT);
+        else if (modelType === 'exponential') model = fitExponential(xsT, ysT);
+    } catch (e) {
+        alert('Could not fit this model to the data (check for zero/negative values with power or exponential models).');
+        return;
+    }
+
+    quanTV2Model = model;
+    quanTV2Data = { xs: xsT, ys: ysT };
+
+    const meanX = xsT.reduce((a,b)=>a+b,0)/n;
+    const meanY = ysT.reduce((a,b)=>a+b,0)/n;
+    const num = xsT.reduce((s,x,i)=> s + (x-meanX)*(ysT[i]-meanY), 0);
+    const denX = Math.sqrt(xsT.reduce((s,x)=> s + (x-meanX)**2, 0));
+    const denY = Math.sqrt(ysT.reduce((s,y)=> s + (y-meanY)**2, 0));
+    const r = num / (denX * denY);
+
+    const residuals = xsT.map((x, i) => ysT[i] - model.predict(x));
+    const ssRes = residuals.reduce((s, e) => s + e*e, 0);
+    const ssTot = ysT.reduce((s,y)=> s + (y-meanY)**2, 0);
+    const r2 = 1 - ssRes / ssTot;
+
+    const canvas = document.getElementById('quan-tv2-chart');
+    canvas.style.display = 'block';
+    canvas.previousElementSibling.style.display = 'none';
+    canvas.style.height = '';
+    canvas.style.width = '';
+    canvas.removeAttribute('width');
+    canvas.removeAttribute('height');
+
+    if (canvas._hoverHandler) { canvas.removeEventListener('mousemove', canvas._hoverHandler); canvas._hoverHandler = null; }
+    if (canvas._leaveHandler) { canvas.removeEventListener('mouseleave', canvas._leaveHandler); canvas._leaveHandler = null; }
+    canvas.style.cursor = 'default';
+
+    const bg = document.getElementById('quan-tv2-bg').value;
+    const axisColor = document.getElementById('quan-tv2-axis-color').value;
+    const titleColor = document.getElementById('quan-tv2-title-color').value;
+    const gridColor = document.getElementById('quan-tv2-grid-color').value;
+    const pointColor = document.getElementById('quan-tv2-point-color').value;
+    const lineColor = document.getElementById('quan-tv2-line-color').value;
+
+    if (chartType === 'scatter' || chartType === 'regression') {
+        drawQuanTV2Scatter(canvas, xsT, ysT, xName, yName, model, chartType === 'regression', bg, axisColor, titleColor, gridColor, pointColor, lineColor);
+    } else if (chartType === 'residual') {
+        drawQuanTV2Residuals(canvas, xsT, residuals, xName, bg, axisColor, titleColor, gridColor, pointColor);
+    }
+
+    document.getElementById('quan-tv2-n').textContent = n;
+    document.getElementById('quan-tv2-equation').textContent = model.equation;
+    document.getElementById('quan-tv2-r').textContent = r.toFixed(4);
+    document.getElementById('quan-tv2-r2').textContent = r2.toFixed(4);
+
+    const statsTbody = document.getElementById('quan-tv2-stats-tbody');
+    statsTbody.innerHTML = '';
+    xsT.forEach((x, i) => {
+        const yhat = model.predict(x);
+        const resid = ysT[i] - yhat;
+        statsTbody.innerHTML += `<tr>
+            <td>${x}</td>
+            <td>${ysT[i]}</td>
+            <td>${yhat.toFixed(2)}</td>
+            <td>${resid.toFixed(2)}</td>
+        </tr>`;
+    });
+
+    document.getElementById('quan-tv2-stats').style.display = 'block';
+    document.querySelector('#quan-tv2-stats').previousElementSibling.style.display = 'none';
+}
+
+function drawQuanTV2Scatter(canvas, xs, ys, xName, yName, model, showLine, bg, axisColor, titleColor, gridColor, pointColor, lineColor) {
+    const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+    const parent = canvas.parentElement;
+    const W = parent.clientWidth - 40;
+    const H = 400;
+
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = 'auto';
+
+    const ctx = canvas.getContext('2d');
+    const plotW = W - margin.left - margin.right;
+    const plotH = H - margin.top - margin.bottom;
+
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const yMin = Math.min(...ys), yMax = Math.max(...ys);
+    const xPad = (xMax - xMin) * 0.1 || 1;
+    const yPad = (yMax - yMin) * 0.1 || 1;
+    const xLo = xMin - xPad, xHi = xMax + xPad;
+    const yLo = yMin - yPad, yHi = yMax + yPad;
+
+    const toX = x => margin.left + ((x - xLo) / (xHi - xLo)) * plotW;
+    const toY = y => margin.top + plotH - ((y - yLo) / (yHi - yLo)) * plotH;
+
+    const pointPositions = xs.map((x, i) => ({ x: toX(x), y: toY(ys[i]), xVal: x, yVal: ys[i] }));
+
+    function draw(hoveredIdx) {
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        const tickCount = 8;
+        ctx.strokeStyle = gridColor;
+        ctx.fillStyle = axisColor;
+        ctx.font = '11px Montserrat, sans-serif';
+        for (let i = 0; i <= tickCount; i++) {
+            const xv = xLo + (i/tickCount)*(xHi-xLo);
+            const xpix = toX(xv);
+            ctx.beginPath(); ctx.moveTo(xpix, margin.top); ctx.lineTo(xpix, margin.top+plotH); ctx.stroke();
+            ctx.textAlign = 'center';
+            ctx.fillText(xv.toFixed(1), xpix, margin.top+plotH+16);
+
+            const yv = yLo + (i/tickCount)*(yHi-yLo);
+            const ypix = toY(yv);
+            ctx.beginPath(); ctx.moveTo(margin.left, ypix); ctx.lineTo(margin.left+plotW, ypix); ctx.stroke();
+            ctx.textAlign = 'right';
+            ctx.fillText(yv.toFixed(1), margin.left-8, ypix+4);
+        }
+
+        ctx.strokeStyle = axisColor;
+        ctx.beginPath(); ctx.moveTo(margin.left, margin.top+plotH); ctx.lineTo(margin.left+plotW, margin.top+plotH); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(margin.left, margin.top); ctx.lineTo(margin.left, margin.top+plotH); ctx.stroke();
+
+        if (showLine) {
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const steps = 60;
+            for (let i = 0; i <= steps; i++) {
+                const xv = xLo + (i/steps)*(xHi-xLo);
+                const yv = model.predict(xv);
+                const px = toX(xv), py = toY(yv);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        pointPositions.forEach((p, i) => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, i === hoveredIdx ? 7 : 5, 0, Math.PI*2);
+            ctx.fillStyle = i === hoveredIdx ? '#ffffff' : pointColor;
+            ctx.fill();
+        });
+
+        ctx.fillStyle = titleColor;
+        ctx.font = '12px Montserrat, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(xName, margin.left+plotW/2, H-8);
+        ctx.save();
+        ctx.translate(16, margin.top+plotH/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText(yName, 0, 0);
+        ctx.restore();
+
+        if (hoveredIdx !== null && hoveredIdx !== undefined) {
+            const p = pointPositions[hoveredIdx];
+            const label = `(${p.xVal}, ${p.yVal})`;
+            ctx.font = '12px Montserrat, sans-serif';
+            const tw = ctx.measureText(label).width;
+            const tx = Math.min(Math.max(p.x - tw/2 - 6, margin.left), margin.left+plotW-tw-12);
+            const ty = p.y - 22;
+            ctx.fillStyle = '#333';
+            ctx.beginPath(); ctx.roundRect(tx, ty, tw+12, 20, 4); ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            ctx.fillText(label, tx+6, ty+14);
+        }
+    }
+
+    draw(null);
+
+    canvas._hoverHandler = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+        const mx = (e.clientX-rect.left)*scaleX, my = (e.clientY-rect.top)*scaleY;
+        let hoveredIdx = null;
+        pointPositions.forEach((p, i) => {
+            if (Math.sqrt((p.x-mx)**2+(p.y-my)**2) <= 7) hoveredIdx = i;
+        });
+        draw(hoveredIdx);
+        canvas.style.cursor = hoveredIdx !== null ? 'pointer' : 'default';
+    };
+    canvas._leaveHandler = function() { draw(null); canvas.style.cursor = 'default'; };
+    canvas.addEventListener('mousemove', canvas._hoverHandler);
+    canvas.addEventListener('mouseleave', canvas._leaveHandler);
+}
+
+function drawQuanTV2Residuals(canvas, xs, residuals, xName, bg, axisColor, titleColor, gridColor, pointColor) {
+    const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+    const parent = canvas.parentElement;
+    const W = parent.clientWidth - 40;
+    const H = 350;
+
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = 'auto';
+
+    const ctx = canvas.getContext('2d');
+    const plotW = W - margin.left - margin.right;
+    const plotH = H - margin.top - margin.bottom;
+
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const absMax = Math.max(...residuals.map(Math.abs)) || 1;
+    const xPad = (xMax - xMin) * 0.1 || 1;
+    const xLo = xMin - xPad, xHi = xMax + xPad;
+    const yLo = -absMax * 1.2, yHi = absMax * 1.2;
+
+    const toX = x => margin.left + ((x - xLo) / (xHi - xLo)) * plotW;
+    const toY = y => margin.top + plotH - ((y - yLo) / (yHi - yLo)) * plotH;
+
+    const pointPositions = xs.map((x, i) => ({ x: toX(x), y: toY(residuals[i]), xVal: x, resVal: residuals[i] }));
+
+    function draw(hoveredIdx) {
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        const tickCount = 8;
+        ctx.strokeStyle = gridColor;
+        ctx.fillStyle = axisColor;
+        ctx.font = '11px Montserrat, sans-serif';
+        for (let i = 0; i <= tickCount; i++) {
+            const xv = xLo + (i/tickCount)*(xHi-xLo);
+            const xpix = toX(xv);
+            ctx.beginPath(); ctx.moveTo(xpix, margin.top); ctx.lineTo(xpix, margin.top+plotH); ctx.stroke();
+            ctx.textAlign = 'center';
+            ctx.fillText(xv.toFixed(1), xpix, margin.top+plotH+16);
+        }
+
+        // Zero line (bold)
+        const zeroY = toY(0);
+        ctx.strokeStyle = axisColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(margin.left, zeroY); ctx.lineTo(margin.left+plotW, zeroY); ctx.stroke();
+        ctx.lineWidth = 1;
+
+        ctx.beginPath(); ctx.moveTo(margin.left, margin.top); ctx.lineTo(margin.left, margin.top+plotH); ctx.stroke();
+
+        pointPositions.forEach((p, i) => {
+            ctx.beginPath();
+            ctx.moveTo(p.x, zeroY);
+            ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = gridColor;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, i === hoveredIdx ? 7 : 5, 0, Math.PI*2);
+            ctx.fillStyle = i === hoveredIdx ? '#ffffff' : pointColor;
+            ctx.fill();
+        });
+
+        ctx.fillStyle = titleColor;
+        ctx.font = '12px Montserrat, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(xName, margin.left+plotW/2, H-8);
+        ctx.save();
+        ctx.translate(16, margin.top+plotH/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText('Residual', 0, 0);
+        ctx.restore();
+
+        if (hoveredIdx !== null && hoveredIdx !== undefined) {
+            const p = pointPositions[hoveredIdx];
+            const label = `x=${p.xVal}, R=${p.resVal.toFixed(2)}`;
+            ctx.font = '12px Montserrat, sans-serif';
+            const tw = ctx.measureText(label).width;
+            const tx = Math.min(Math.max(p.x - tw/2 - 6, margin.left), margin.left+plotW-tw-12);
+            const ty = p.y - 22;
+            ctx.fillStyle = '#333';
+            ctx.beginPath(); ctx.roundRect(tx, ty, tw+12, 20, 4); ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            ctx.fillText(label, tx+6, ty+14);
+        }
+    }
+
+    draw(null);
+
+    canvas._hoverHandler = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+        const mx = (e.clientX-rect.left)*scaleX, my = (e.clientY-rect.top)*scaleY;
+        let hoveredIdx = null;
+        pointPositions.forEach((p, i) => {
+            if (Math.sqrt((p.x-mx)**2+(p.y-my)**2) <= 7) hoveredIdx = i;
+        });
+        draw(hoveredIdx);
+        canvas.style.cursor = hoveredIdx !== null ? 'pointer' : 'default';
+    };
+    canvas._leaveHandler = function() { draw(null); canvas.style.cursor = 'default'; };
+    canvas.addEventListener('mousemove', canvas._hoverHandler);
+    canvas.addEventListener('mouseleave', canvas._leaveHandler);
+}
+
+function calculateQuanTV2Predict() {
+    const input = parseFloat(document.getElementById('quan-tv2-predict-x').value);
+    const result = document.getElementById('quan-tv2-predict-result');
+    if (isNaN(input)) { result.textContent = 'Enter a valid number.'; return; }
+    if (!quanTV2Model || !quanTV2Data) { result.textContent = 'Generate a chart first.'; return; }
+
+    const yhat = quanTV2Model.predict(input);
+
+    // Check if this X value exists in the dataset
+    const matchIdx = quanTV2Data.xs.findIndex(x => x === input);
+
+    if (matchIdx !== -1) {
+        const actualY = quanTV2Data.ys[matchIdx];
+        const residual = actualY - yhat;
+        result.textContent = `PREDICTED Y-HAT: ${yhat.toFixed(3)} | ACTUAL Y: ${actualY} | RESIDUAL: ${residual.toFixed(3)}`;
+    } else {
+        result.textContent = `PREDICTED Y-HAT: ${yhat.toFixed(3)} | ACTUAL Y: (N/A) | RESIDUAL: (N/A)`;
+    }
+}
+
+function downloadQuanTV2() {
+    const canvas = document.getElementById('quan-tv2-chart');
+    const link = document.createElement('a');
+    link.download = 'chart.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+async function copyQuanTV2() {
+    const canvas = document.getElementById('quan-tv2-chart');
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    alert('Chart copied to clipboard!');
+}

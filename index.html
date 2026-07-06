@@ -867,19 +867,117 @@
 
         </div>
 
-        <!---Two Variable Groups -->
         <div id="quan-two-variable" class="page">
-            <button class="back-button" onclick="showPage('page', 'quantitative')">Back</button>
-            
-            <div class="page-header">
-                <h2><span style="color: #ff2020;">Two Variable Groups</span> Quantitative Data Analysis</h2>
-                <p>Analyze and compare two quantitative variables through scatter plots, side-by-side box plots, and correlation analysis.</p>
+        <button class="back-button" onclick="showPage('page', 'quantitative')">Back</button>
+
+        <div class="page-header">
+            <h2><span style="color: #ff2020;">Two Variable Groups</span> Quantitative Data Analysis</h2>
+            <p>Analyze and compare two quantitative variables through scatter plots, regression lines, and residual analysis.</p>
+        </div>
+
+        <div class="page-divider"></div>
+
+        <div class="tool-container">
+            <div class="input-panel">
+
+                <label class="input-label">X Variable Name</label>
+                <input id="quan-tv-xname" type="text" class="input-field" placeholder="e.g. Hours Studied">
+
+                <label class="input-label">X Data (comma separated)</label>
+                <textarea class="input-field" id="quan-tv-xdata" placeholder="e.g. 1, 2, 3, 4"></textarea>
+
+                <label class="input-label">Y Variable Name</label>
+                <input id="quan-tv-yname" type="text" class="input-field" placeholder="e.g. Test Score">
+
+                <label class="input-label">Y Data (comma separated)</label>
+                <textarea class="input-field" id="quan-tv-ydata" placeholder="e.g. 65, 70, 78, 85"></textarea>
+
+                <label class="input-label">Regression Model</label>
+                <select class="input-select" id="quan-tv-model">
+                    <option value="linear">Linear</option>
+                    <option value="quadratic">Quadratic</option>
+                    <option value="exponential">Exponential</option>
+                </select>
+
+                <label class="input-label">Chart Type</label>
+                <select class="input-select" id="quan-tv-charttype">
+                    <option value="scatter">Scatter Plot</option>
+                    <option value="regression">Scatter + Regression Line</option>
+                    <option value="residual">Residual Plot</option>
+                </select>
+
+                <button class="generate-button" onclick="generateQuanTV2()">Generate Chart</button>
             </div>
 
-            <div class="page-divider"></div>
-
-
+            <div class="output-panel">
+                <p class="output-placeholder">Enter data and press generate to see the chart.</p>
+                <canvas id="quan-tv2-chart" style="display:none;"></canvas>
+            </div>
         </div>
+
+        <div class="bottom-container">
+            <div class="stats-panel">
+                <p class="output-placeholder">Stats will appear here after generating the chart.</p>
+                <div id="quan-tv2-stats" style="display:none;">
+                    <div class="stat-summary">
+                        <p><span class="stat-label">n:</span> <span id="quan-tv2-n"></span></p>
+                        <p><span class="stat-label">Equation:</span> <span id="quan-tv2-equation"></span></p>
+                        <p><span class="stat-label">r:</span> <span id="quan-tv2-r"></span> &nbsp; <span class="stat-label">r²:</span> <span id="quan-tv2-r2"></span></p>
+                    </div>
+
+                    <div class="page-divider"></div>
+
+                    <p class="input-label">Interpolate / Predict</p>
+                    <label class="input-label">X Value</label>
+                    <input type="number" class="input-field" id="quan-tv2-predict-x" placeholder="e.g. 5">
+                    <button class="custom-button" onclick="calculateQuanTV2Predict()">Predict Y &amp; Residual</button>
+                    <p id="quan-tv2-predict-result" style="color: #AAAAAA; font-size: 13px;"></p>
+
+                    <div class="page-divider"></div>
+
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>X</th>
+                                <th>Y Actual</th>
+                                <th>Y-hat Predicted</th>
+                                <th>Residual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quan-tv2-stats-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="custom-panel">
+                <p class="input-label">Export</p>
+                <button class="custom-button" onclick="downloadQuanTV2()">Download as PNG</button>
+                <button class="custom-button" onclick="copyQuanTV2()">Copy to Clipboard</button>
+
+                <div class="page-divider"></div>
+
+                <p class="input-label">Chart Appearance</p>
+
+                <label class="input-label">Chart Background</label>
+                <input type="color" class="color-input" id="quan-tv2-bg" value="#242424" oninput="generateQuanTV2()">
+
+                <label class="input-label">Axis Label Color</label>
+                <input type="color" class="color-input" id="quan-tv2-axis-color" value="#aaaaaa" oninput="generateQuanTV2()">
+
+                <label class="inputLabel">Title Color</label>
+                <input type="color" class="color-input" id="quan-tv2-title-color" value="#ffffff" oninput="generateQuanTV2()">
+
+                <label class="input-label">Gridline Color</label>
+                <input type="color" class="color-input" id="quan-tv2-grid-color" value="#2e2e2e" oninput="generateQuanTV2()">
+
+                <label class="input-label">Point Color</label>
+                <input type="color" class="color-input" id="quan-tv2-point-color" value="#5897cb" oninput="generateQuanTV2()">
+
+                <label class="input-label">Line Color</label>
+                <input type="color" class="color-input" id="quan-tv2-line-color" value="#dc5353" oninput="generateQuanTV2()">
+            </div>
+        </div>
+    </div>
 
         <!---Distribution Analysis-->
         <!---Normal Distribution -->
