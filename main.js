@@ -12,10 +12,12 @@ function showPage(type, id) {
 function addRow(tbodyId) {
     const tbody = document.getElementById(tbodyId);
     const row = document.createElement('tr');
+    const color = randomGroupColor();
+
     row.innerHTML = `
         <td><input type="text" class="table-input" placeholder="Category"></td>
         <td><input type="number" class="table-input" placeholder="Frequency"></td>
-        <td><input type="color" class="color-input" value="#5897cb"></td>
+        <td><input type="color" class="color-input" value="${color}"></td>
         <td><button class="remove-row-button" onclick="removeRow(this)">X</button></td>
     `;
     tbody.appendChild(row);
@@ -398,6 +400,7 @@ function addGroupOM() {
     const colorRow = document.getElementById('cat-om-colors');
     const tbody = document.getElementById('cat-om-tbody');
     const groupCount = header.querySelectorAll('th').length - 1;
+    const color = randomGroupColor();
 
     // Add header before last th (the empty X column)
     const lastTh = header.querySelector('th:last-child');
@@ -408,7 +411,7 @@ function addGroupOM() {
     // Add color picker before last td in color row
     const lastColorTd = colorRow.querySelector('td:last-child');
     const newColorTd = document.createElement('td');
-    newColorTd.innerHTML = `<input type="color" class="color-input" value="#5897cb">`;
+    newColorTd.innerHTML = `<input type="color" class="color-input" value="${color}">`;
     colorRow.insertBefore(newColorTd, lastColorTd);
 
     // Add number input before last td (X button) in each data row
@@ -509,12 +512,13 @@ function addRowTV() {
     const header = document.getElementById('cat-tv-header');
     const tbody = document.getElementById('cat-tv-tbody');
     const colCount = header.querySelectorAll('th').length - 3;
+    const color = randomGroupColor();
 
     let cells = `<td><input type="text" class="table-input" placeholder="Row"></td>`;
     for (let i = 0; i < colCount; i++) {
         cells += `<td><input type="number" class="table-input" placeholder="0"></td>`;
     }
-    cells += `<td><input type="color" class="color-input" value="#5897cb"></td>`;
+    cells += `<td><input type="color" class="color-input" value="${color}"></td>`;
     cells += `<td><button class="remove-row-button" onclick="removeRow(this)">X</button></td>`;
 
     const row = document.createElement('tr');
@@ -787,7 +791,7 @@ function generateQuanOS() {
     const raw = document.getElementById('quan-os-data').value;
     const varName = document.getElementById('quan-os-varname').value.trim() || 'Variable';
     const chartType = document.getElementById('quan-os-charttype').value;
-    const barColor = document.getElementById('quan-os-bar-color').value;
+    const barColor = document.getElementById('quan-os-dot-color').value;
 
     // Separate
     const values = raw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
@@ -852,7 +856,7 @@ function generateQuanOS() {
         const bg = document.getElementById('quan-os-bg').value;
         const axisColor = document.getElementById('quan-os-axis-color').value;
         const gridColor = document.getElementById('quan-os-grid-color').value;
-        const barColor = document.getElementById('quan-os-bar-color').value;
+        const barColor = document.getElementById('quan-os-dot-color').value;
 
         function drawHistogram(hoveredIdx) {
             ctx2d.clearRect(0, 0, W, H);
