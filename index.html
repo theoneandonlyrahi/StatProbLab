@@ -996,7 +996,7 @@
                 <div class="input-panel">
 
                     <label class="input-label">Variable Name</label>
-                    <input type="text" class="input-field" id="dist-normal-varname" placeholder="e.g. Height in inches">
+                    <input type="text" class="input-field" id="dist-normal-varname" placeholder="e.g. Height">
 
                     <label class="input-label">Mean</label>
                     <input type="number" class="input-field" id="dist-normal-mean" placeholder="e.g. 0">
@@ -1016,10 +1016,13 @@
             <div class="bottom-container">
                 <div class="stats-panel">
                     <p class="output-placeholder">Stats will appear here after generating the chart.</p>
-                    <div id="dist-normal-stats" style="display:block;">
+                    <div id="dist-normal-stats" style="display:none;">
                         <div class="stat-summary">
                             <p><span class="stat-label">Mean:</span> <span id="dist-normal-mean-val"></span></p>
                             <p><span class="stat-label">Standard Deviation:</span> <span id="dist-normal-sd-val"></span></p>
+
+                            <label class="input-label">Show Shade</label>
+                            <input type="checkbox" class="input-checkbox" id="dist-normal-shade" checked onchange="generateNormalDistribution()">
 
                             <div class="page-divider"></div>
 
@@ -1038,7 +1041,7 @@
                             <div style="height: 10px;"></div>
 
                             <p class="input-label">Inverse Normal</p>
-                            <label class="input-label">Probability/Area</label>
+                            <label class="input-label">Probability/Area from left tail</label>
                             <input type="number" class="input-field" id="dist-normal-inverse-prob" placeholder="e.g. 0.7 for 70%">
                             <button class="custom-button" onclick="calculateInverseNormal()">Calculate Inverse</button>
                             <p id="dist-normal-inverse-result" style="color: #AAAAAA; font-size: 13px;"></p>
@@ -1072,6 +1075,9 @@
 
                     <label class="input-label">Boundary Color</label>
                     <input type="color" class="color-input" id="dist-normal-boundary-color" value="#c2b4ff" oninput="generateNormalDistribution()">
+
+                    <label class="input-label">Shade Color</label>
+                    <input type="color" class="color-input" id="dist-normal-shade-color" value="#dcb2eb" oninput="generateNormalDistribution()">
                 </div>
             </div>
 

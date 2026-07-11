@@ -2397,3 +2397,308 @@ async function copyQuanTV2() {
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
     alert('Chart copied to clipboard!');
 }
+
+// Distributions
+// Assume it's standardized
+let distNormalMean = 0;
+let distNormalSD = 1;
+let distNormalShade = null;
+
+function generateNormalDistribution() {
+    const mean = parseFloat(document.getElementById('dist-normal-mean').value) || 0;
+    const sd = parseFloat(document.getElementById('dist-normal-sd').value);
+ 
+    if (isNaN(sd) || sd <= 0) {
+        alert('Standard deviation must be a positive number.');
+        return;
+    }
+ 
+    const changed = mean !== distNormalMean || sd !== distNormalSD;
+    distNormalMean = mean;
+    distNormalSD = sd;
+    if (changed) distNormalShade = null;
+ 
+    document.getElementById('dist-normal-mean-val').textContent = mean;
+    document.getElementById('dist-normal-sd-val').textContent = sd;
+    if (changed) {
+        document.getElementById('dist-normal-prob-result').textContent = '';
+        document.getElementById('dist-normal-inverse-result').textContent = '';
+    }
+ 
+    const canvas = document.getElementById('dist-normal-chart');
+    canvas.style.display = 'block';
+    canvas.previousElementSibling.style.display = 'none';
+
+    document.getElementById('dist-normal-stats').style.display = 'block';
+    document.querySelector('#dist-normal-stats').previousElementSibling.style.display = 'none';
+ 
+    drawDistNormalChart();
+}
+
+function drawDistNormalChart() {
+    const mean = distNormalMean;
+    const sd = distNormalSD;
+    const shade = distNormalShade;
+    const canvas = document.getElementById('dist-normal-chart');
+ 
+    canvas.style.height = '';
+    canvas.style.width = '';
+    canvas.removeAttribute('width');
+    canvas.removeAttribute('height');
+ 
+    const margin = { top: 20, right: 30, bottom: 50, left: 50 };
+    const parent = canvas.parentElement;
+    const W = parent.clientWidth - 40;
+    const H = 340;
+ 
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.display = 'block';
+    canvas.style.height = 'auto';
+ 
+    const ctx = canvas.getContext('2d');
+    const plotW = W - margin.left - margin.right;
+    const plotH = H - margin.top - margin.bottom;
+ 
+    const bg = document.getElementById('dist-normal-bg').value;
+    const axisColor = document.getElementById('dist-normal-axis-color').value;
+    const titleColor = document.getElementById('dist-normal-title-color').value;
+    const gridColor = document.getElementById('dist-normal-grid-color').value;
+    const curveColor = document.getElementById('dist-normal-curve-color').value;
+    const boundaryColor = document.getElementById('dist-normal-boundary-color').value;
+    const shadeColor = document.getElementById('dist-normal-shade-color').value;
+    const varName = document.getElementById('dist-normal-varname').value.trim() || 'X';
+ 
+    const xLo = mean - 4 * sd;
+    const xHi = mean + 4 * sd;
+    const toX = x => margin.left + ((x - xLo) / (xHi - xLo)) * plotW;
+ 
+    const peakDensity = normalPDF(mean, mean, sd);
+    const toY = y => margin.top + plotH - (y / peakDensity) * plotH * 0.95;
+ 
+    // Background
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+ 
+    // Vertical gridlines at each standard deviation
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let k = -4; k <= 4; k++) {
+        const xpix = toX(mean + k * sd);
+        ctx.beginPath();
+        ctx.moveTo(xpix, margin.top);
+        ctx.lineTo(xpix, margin.top + plotH);
+        ctx.stroke();
+    }
+ 
+    // Shaded probability region (drawn under the curve outline thru shade)
+    const showShade = document.getElementById('dist-normal-shade').checked;
+    if (shade && showShade) {
+        let shadeLo, shadeHi;
+        if (shade.type === 'left-tail') {
+            shadeLo = xLo; shadeHi = shade.value;
+        } else if (shade.type === 'greater-than') {
+            shadeLo = shade.value; shadeHi = xHi;
+        } else if (shade.type === 'center') {
+            const dist = Math.abs(shade.value - mean);
+            shadeLo = mean - dist; shadeHi = mean + dist;
+        }
+        shadeLo = Math.max(shadeLo, xLo);
+        shadeHi = Math.min(shadeHi, xHi);
+ 
+        if (shadeHi > shadeLo) {
+            ctx.beginPath();
+            ctx.moveTo(toX(shadeLo), margin.top + plotH);
+            const steps = 80;
+            for (let i = 0; i <= steps; i++) {
+                const xv = shadeLo + (i / steps) * (shadeHi - shadeLo);
+                ctx.lineTo(toX(xv), toY(normalPDF(xv, mean, sd)));
+            }
+            ctx.lineTo(toX(shadeHi), margin.top + plotH);
+            ctx.closePath();
+            ctx.fillStyle = shadeColor + '50';
+            ctx.fill();
+        }
+    }
+ 
+    // The bell curve
+    ctx.strokeStyle = curveColor;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    const steps = 200;
+    for (let i = 0; i <= steps; i++) {
+        const xv = xLo + (i / steps) * (xHi - xLo);
+        const px = toX(xv), py = toY(normalPDF(xv, mean, sd));
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+ 
+    // Dashed boundary line marking the shaded region
+    if (shade && showShade) {
+        ctx.strokeStyle = boundaryColor;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        const drawBoundary = (xv) => {
+            if (xv < xLo || xv > xHi) return;
+            const px = toX(xv);
+            ctx.beginPath();
+            ctx.moveTo(px, margin.top);
+            ctx.lineTo(px, margin.top + plotH);
+            ctx.stroke();
+        };
+        if (shade.type === 'left-tail' || shade.type === 'greater-than') {
+            drawBoundary(shade.value);
+        } else if (shade.type === 'center') {
+            const dist = Math.abs(shade.value - mean);
+            drawBoundary(mean - dist);
+            drawBoundary(mean + dist);
+        }
+        ctx.setLineDash([]);
+    }
+ 
+    // X axis line
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, margin.top + plotH);
+    ctx.lineTo(margin.left + plotW, margin.top + plotH);
+    ctx.stroke();
+ 
+    // X tick labels
+    ctx.fillStyle = axisColor;
+    ctx.font = '11px Montserrat, sans-serif';
+    ctx.textAlign = 'center';
+    for (let k = -4; k <= 4; k++) {
+        const xv = mean + k * sd;
+        const xpix = toX(xv);
+        ctx.beginPath();
+        ctx.moveTo(xpix, margin.top + plotH);
+        ctx.lineTo(xpix, margin.top + plotH + 5);
+        ctx.stroke();
+        ctx.fillText(xv.toFixed(2), xpix, margin.top + plotH + 18);
+    }
+ 
+    // Axis titles
+    ctx.fillStyle = titleColor;
+    ctx.font = '12px Montserrat, sans-serif';
+    ctx.fillText(varName, margin.left + plotW / 2, H - 8);
+ 
+    ctx.save();
+    ctx.translate(14, margin.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText('Density', 0, 0);
+    ctx.restore();
+}
+
+// Helper functions
+function normalPDF(x, mean, sd) {
+    return (1 / (sd * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / sd, 2));
+}
+
+function normalCDF(x, mean, sd) {
+    const z = (x - mean) / (sd * Math.sqrt(2));
+    return 0.5 * (1 + erf(z));
+}
+
+function erf(x) {
+    const sign = x >= 0 ? 1 : -1;
+    x = Math.abs(x);
+    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741,
+          a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+    const t = 1 / (1 + p * x);
+    const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    return sign * y;
+}
+
+// invNorm which was pretty confusing and had to use a tutorial using hardcoded constants. This means it's only an approximation and God knows the accuracy lmao
+function inverseNormalCDF(p) {
+    if (p <= 0) return -Infinity;
+    if (p >= 1) return Infinity;
+ 
+    const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+                1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+    const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+                6.680131188771972e+01, -1.328068155288572e+01];
+    const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+               -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+    const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+ 
+    const pLow = 0.02425;
+    const pHigh = 1 - pLow;
+ 
+    if (p < pLow) {
+        const q = Math.sqrt(-2 * Math.log(p));
+        return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+               ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+    } else if (p <= pHigh) {
+        const q = p - 0.5;
+        const r = q * q;
+        return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q /
+               (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+    } else {
+        const q = Math.sqrt(-2 * Math.log(1 - p));
+        return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+                ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+    }
+}
+
+function calculateNormalDistributionProbability() {
+    const mean = distNormalMean;
+    const sd = distNormalSD;
+    const type = document.getElementById('dist-normal-prob-type').value;
+    const value = parseFloat(document.getElementById('dist-normal-prob-value').value);
+    const result = document.getElementById('dist-normal-prob-result');
+ 
+    if (isNaN(value)) { result.textContent = 'Enter a valid value.'; return; }
+ 
+    let prob;
+    if (type === 'left-tail') {
+        prob = normalCDF(value, mean, sd);
+    } else if (type === 'greater-than') {
+        prob = 1 - normalCDF(value, mean, sd);
+    } else { // center: area within |value - mean| of the mean
+        const dist = Math.abs(value - mean);
+        prob = normalCDF(mean + dist, mean, sd) - normalCDF(mean - dist, mean, sd);
+    }
+ 
+    distNormalShade = { type, value };
+    drawDistNormalChart();
+ 
+    result.textContent = `P = ${prob.toFixed(4)} (${(prob * 100).toFixed(2)}%)`;
+}
+
+function calculateInverseNormal() {
+    const mean = distNormalMean;
+    const sd = distNormalSD;
+    const p = parseFloat(document.getElementById('dist-normal-inverse-prob').value);
+    const result = document.getElementById('dist-normal-inverse-result');
+ 
+    if (isNaN(p) || p <= 0 || p >= 1) {
+        result.textContent = 'Enter a probability strictly between 0 and 1.';
+        return;
+    }
+ 
+    const z = inverseNormalCDF(p);
+    const value = mean + z * sd;
+ 
+    distNormalShade = { type: 'left-tail', value };
+    drawDistNormalChart();
+ 
+    result.textContent = `x = ${value.toFixed(4)}  (z = ${z.toFixed(4)})`;
+}
+
+function downloadNormalDistribution() {
+    const canvas = document.getElementById('dist-normal-chart');
+    const link = document.createElement('a');
+    link.download = 'normal_distribution.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+ 
+async function copyNormalDistribution() {
+    const canvas = document.getElementById('dist-normal-chart');
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    alert('Chart copied to clipboard!');
+}
