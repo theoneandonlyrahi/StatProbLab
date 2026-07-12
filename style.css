@@ -340,6 +340,22 @@ a:hover {
     border-radius: 12px;
     border: 1px solid #333;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.appearance-columns {
+    display: flex;
+    gap: 20px;
+}
+
+.appearance-column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 /*  Input Styles   */

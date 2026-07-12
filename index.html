@@ -1041,7 +1041,13 @@
                             <div style="height: 10px;"></div>
 
                             <p class="input-label">Inverse Normal</p>
-                            <label class="input-label">Probability/Area from left tail</label>
+                            <label class="input-label">Tail</label>
+                            <select class="input-select" id="dist-normal-inverse-type">
+                                <option value="left-tail">Left</option>
+                                <option value="greater-than">Right</option>
+                                <option value="center">Center</option>
+                            </select>
+                            <label class="input-label">Probability/Area</label>
                             <input type="number" class="input-field" id="dist-normal-inverse-prob" placeholder="e.g. 0.7 for 70%">
                             <button class="custom-button" onclick="calculateInverseNormal()">Calculate Inverse</button>
                             <p id="dist-normal-inverse-result" style="color: #AAAAAA; font-size: 13px;"></p>
@@ -1056,28 +1062,36 @@
 
                     <div class="page-divider"></div>
 
-                    <p class="input-label">Chart Appearance</p>
+                    <p class="input-label">Customization</p>
 
-                    <label class="input-label">Chart Background</label>
-                    <input type="color" class="color-input" id="dist-normal-bg" value="#242424" oninput="generateNormalDistribution()">
+                    <div class="appearance-columns">
 
-                    <label class="input-label">Axis Label Color</label>
-                    <input type="color" class="color-input" id="dist-normal-axis-color" value="#aaaaaa" oninput="generateNormalDistribution()">
+                        <div class="appearance-column">
+        
+                            <label class="input-label">Chart Background</label>
+                            <input type="color" class="color-input" id="dist-normal-bg" value="#242424" oninput="generateNormalDistribution()">
 
-                    <label class="inputLabel">Title Color</label>
-                    <input type="color" class="color-input" id="dist-normal-title-color" value="#ffffff" oninput="generateNormalDistribution()">
+                            <label class="input-label">Axis Label Color</label>
+                            <input type="color" class="color-input" id="dist-normal-axis-color" value="#aaaaaa" oninput="generateNormalDistribution()">
 
-                    <label class="input-label">Gridline Color</label>
-                    <input type="color" class="color-input" id="dist-normal-grid-color" value="#2e2e2e" oninput="generateNormalDistribution()">
+                            <label class="inputLabel">Title Color</label>
+                            <input type="color" class="color-input" id="dist-normal-title-color" value="#ffffff" oninput="generateNormalDistribution()">
 
-                    <label class="input-label">Curve Color</label>
-                    <input type="color" class="color-input" id="dist-normal-curve-color" value="#6656ae" oninput="generateNormalDistribution()">
+                            <label class="input-label">Gridline Color</label>
+                            <input type="color" class="color-input" id="dist-normal-grid-color" value="#2e2e2e" oninput="generateNormalDistribution()">
+                        </div>
 
-                    <label class="input-label">Boundary Color</label>
-                    <input type="color" class="color-input" id="dist-normal-boundary-color" value="#c2b4ff" oninput="generateNormalDistribution()">
+                        <div class="appearance-column">
+                            <label class="input-label">Curve Color</label>
+                            <input type="color" class="color-input" id="dist-normal-curve-color" value="#6656ae" oninput="generateNormalDistribution()">
+                            
+                            <label class="input-label">Boundary Color</label>
+                            <input type="color" class="color-input" id="dist-normal-boundary-color" value="#c2b4ff" oninput="generateNormalDistribution()">
 
-                    <label class="input-label">Shade Color</label>
-                    <input type="color" class="color-input" id="dist-normal-shade-color" value="#dcb2eb" oninput="generateNormalDistribution()">
+                            <label class="input-label">Shade Color</label>
+                            <input type="color" class="color-input" id="dist-normal-shade-color" value="#dcb2eb" oninput="generateNormalDistribution()">
+                        </div>
+                    </div>
                 </div>
             </div>
 

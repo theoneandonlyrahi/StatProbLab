@@ -2673,19 +2673,42 @@ function calculateInverseNormal() {
     const sd = distNormalSD;
     const p = parseFloat(document.getElementById('dist-normal-inverse-prob').value);
     const result = document.getElementById('dist-normal-inverse-result');
- 
+    const type = document.getElementById('dist-normal-inverse-type').value;
+
     if (isNaN(p) || p <= 0 || p >= 1) {
         result.textContent = 'Enter a probability strictly between 0 and 1.';
         return;
     }
  
-    const z = inverseNormalCDF(p);
-    const value = mean + z * sd;
+    if (type === 'left-tail') {
+        const z = inverseNormalCDF(p);
+        const value = mean + z * sd;
  
-    distNormalShade = { type: 'left-tail', value };
-    drawDistNormalChart();
+        distNormalShade = { type: 'left-tail', value };
+        drawDistNormalChart();
  
-    result.textContent = `x = ${value.toFixed(4)}  (z = ${z.toFixed(4)})`;
+        result.textContent = `x = ${value.toFixed(4)}  (z = ${z.toFixed(4)})`;
+ 
+    } else if (type === 'greater-than') {
+        const z = inverseNormalCDF(1 - p);
+        const value = mean + z * sd;
+ 
+        distNormalShade = { type: 'greater-than', value };
+        drawDistNormalChart();
+ 
+        result.textContent = `x = ${value.toFixed(4)}  (z = ${z.toFixed(4)})`;
+ 
+    } else { // center
+        const z = inverseNormalCDF((1 + p) / 2);
+        const dist = z * sd;
+        const lo = mean - dist;
+        const hi = mean + dist;
+ 
+        distNormalShade = { type: 'center', value: hi };
+        drawDistNormalChart();
+ 
+        result.textContent = `x = ${lo.toFixed(4)} to ${hi.toFixed(4)}  (|z| = ${z.toFixed(4)})`;
+    }
 }
 
 function downloadNormalDistribution() {
