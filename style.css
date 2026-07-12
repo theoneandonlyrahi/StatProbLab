@@ -633,3 +633,60 @@ a:hover {
     overflow: hidden;
     min-height: 60px;
 }
+
+.remove-row-button {
+    padding: 8px;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+/*  Mobile  */
+
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    #sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px;
+        gap: 4px;
+    }
+
+    #sidebar:hover {
+        width: 100%;
+    }
+
+    #sidebar button {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    #main {
+        padding: 20px;
+    }
+
+    .tool-container,
+    .bottom-container,
+    .appearance-columns {
+        flex-direction: column;
+    }
+
+    .input-panel {
+        width: 100%;
+    }
+
+    .cards-container {
+        width: 100%;
+    }
+
+    .page-text,
+    .home-intro {
+        margin: 12px 16px;
+    }
+}
