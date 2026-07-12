@@ -2587,7 +2587,7 @@ function drawDistNormalChart() {
     ctx.translate(14, margin.top + plotH / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.textAlign = 'center';
-    ctx.fillText('Density', 0, 0);
+    ctx.fillText('', 0, 0);
     ctx.restore();
 }
 
