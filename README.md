@@ -5,8 +5,6 @@ An interactive statistics and probability learning tool built for students and e
 Live Sites: https://theoneandonlyrahi.github.io/StatProbLab/ and https://stat-prob-lab.vercel.app/
 (might be blocked by your IT; contact them to whitelist it)
 
----
-
 ## Features
 
 ### Categorical Data Analysis
