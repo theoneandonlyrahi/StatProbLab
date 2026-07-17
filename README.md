@@ -33,38 +33,8 @@ Live Sites: https://theoneandonlyrahi.github.io/StatProbLab/ and https://stat-pr
 - Statistical Significance
 - Parkinson's Smell Test
 
----
-
-## Credits
-
-- HTML, CSS, JavaScript
-- [Chart.js](https://www.chartjs.org/) for data visualization
-- Hosted on GitHub Pages
-
----
 
 ## Usage
 
 Navigate using the sidebar on the left. Click any card to open the corresponding tool. Each tool has an input panel, visualization output, and stats summary.
 
-> Note: Currently desktop-only. Mobile support is not yet implemented.
-
----
-
-## Roadmap
-
-- Complete all categorical data analysis tools
-- Complete all quantitative data analysis tools
-- Build out all distribution pages
-- Build out all simulation pages
-- Add mobile compatibility
-- Add settings page
-- Raw data input mode (comma-separated)
-
----
-
-## Acknowledgements
-
-Built by **Rahidul Alam** as a personal project inspired by a Probability and Statistics class in high school.
-
----
